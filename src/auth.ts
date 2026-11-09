@@ -1,4 +1,4 @@
-import NextAuth, { AuthError, CredentialsSignin } from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "./auth.config";
 import { authorizeCredentials } from "@/server/auth/credentials";
@@ -12,7 +12,6 @@ export class ThaiCredentialsError extends CredentialsSignin {
   }
 }
 
-export { AuthError };
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
