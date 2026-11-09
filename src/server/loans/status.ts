@@ -12,7 +12,7 @@ export async function transition(
   db: Db,
   loanId: string,
   from: LoanStatus[],
-  data: Prisma.LoanUpdateInput,
+  data: Prisma.LoanUncheckedUpdateManyInput,
 ): Promise<void> {
   const res = await db.loan.updateMany({ where: { id: loanId, status: { in: from } }, data });
   if (res.count === 0) throw new AppError("รายการนี้ถูกดำเนินการไปแล้ว");

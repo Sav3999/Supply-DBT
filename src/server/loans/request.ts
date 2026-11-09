@@ -1,5 +1,4 @@
 import type { Loan, LoanItem, Item } from "@prisma/client";
-import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { formatDateOnly, parseDateOnly, todayBangkok } from "@/lib/dates";
@@ -9,6 +8,7 @@ import type { SessionUser } from "@/server/auth/session";
 import { availableQuantity } from "./availability";
 import { validateLoanDates } from "./dates";
 import { emitLoanEvent } from "./events";
+import { lockItems } from "./locks";
 import { transition } from "./status";
 
 const dateStr = z
@@ -40,9 +40,9 @@ export async function createLoan(actor: SessionUser, input: unknown, now: Date =
   const due = parseDateOnly(v.dueDate);
 
   const loan = await prisma.$transaction(async (tx) => {
-    const ids = v.items.map((i) => i.itemId).sort();
+    const ids = v.items.map((i) => i.itemId);
     // lock item rows (sorted → no deadlocks) so concurrent approvals/edits can't oversubscribe
-    await tx.$queryRaw(Prisma.sql`SELECT id FROM "Item" WHERE id IN (${Prisma.join(ids)}) ORDER BY id FOR UPDATE`);
+    await lockItems(tx, ids);
     const items = await tx.item.findMany({ where: { id: { in: ids } } });
     const byId = new Map(items.map((i) => [i.id, i]));
     for (const line of v.items) {
