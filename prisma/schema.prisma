@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  BORROWER
+  STAFF
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum ItemKind {
+  SERIALIZED
+  QUANTITY
+}
+
+enum AssetStatus {
+  AVAILABLE
+  ON_LOAN
+  REPAIR
+  LOST
+  RETIRED
+}
+
+enum LoanStatus {
+  PENDING
+  APPROVED
+  BORROWED
+  RETURNED
+  REJECTED
+  CANCELLED
+}
+
+enum Condition {
+  GOOD
+  DAMAGED
+  LOST
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  department   String
+  phone        String
+  role         Role       @default(BORROWER)
+  status       UserStatus @default(PENDING)
+  lineUserId   String?    @unique
+  createdAt    DateTime   @default(now())
+
+  loans         Loan[]         @relation("Borrower")
+  approvedLoans Loan[]         @relation("Approver")
+  linkCodes     LineLinkCode[]
+  notifications Notification[]
+}
+
+model LineLinkCode {
+  code      String   @id
+  userId    String
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id   String @id @default(cuid())
+  name String @unique
+
+  items Item[]
+}
+
+model Item {
+  id            String   @id @default(cuid())
+  name          String
+  categoryId    String
+  description   String?
+  imagePath     String?
+  kind          ItemKind
+  totalQuantity Int      @default(0)
+  maxLoanDays   Int      @default(7)
+  active        Boolean  @default(true)
+
+  category  Category   @relation(fields: [categoryId], references: [id])
+  assets    Asset[]
+  loanItems LoanItem[]
+}
+
+model Asset {
+  id       String      @id @default(cuid())
+  itemId   String
+  assetTag String      @unique
+  status   AssetStatus @default(AVAILABLE)
+
+  item       Item        @relation(fields: [itemId], references: [id])
+  loanAssets LoanAsset[]
+}
+
+model Loan {
+  id           String     @id @default(cuid())
+  borrowerId   String
+  startDate    DateTime   @db.Date
+  dueDate      DateTime   @db.Date
+  purpose      String
+  status       LoanStatus @default(PENDING)
+  approverId   String?
+  rejectReason String?
+  approvedAt   DateTime?
+  handedOverAt DateTime?
+  returnedAt   DateTime?
+  createdAt    DateTime   @default(now())
+
+  borrower User       @relation("Borrower", fields: [borrowerId], references: [id])
+  approver User?      @relation("Approver", fields: [approverId], references: [id])
+  items    LoanItem[]
+
+  @@index([status])
+  @@index([borrowerId])
+}
+
+model LoanItem {
+  id               String @id @default(cuid())
+  loanId           String
+  itemId           String
+  quantity         Int
+  returnedQuantity Int    @default(0)
+
+  loan   Loan        @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  item   Item        @relation(fields: [itemId], references: [id])
+  assets LoanAsset[]
+}
+
+model LoanAsset {
+  loanItemId String
+  assetId    String
+  returnedAt DateTime?
+  condition  Condition?
+
+  loanItem LoanItem @relation(fields: [loanItemId], references: [id], onDelete: Cascade)
+  asset    Asset    @relation(fields: [assetId], references: [id])
+
+  @@id([loanItemId, assetId])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  message   String
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+}
+
+// loanId is a plain string (no FK): a sentinel "STAFF_DIGEST" is stored here too.
+model ReminderLog {
+  loanId String
+  type   String
+  date   DateTime @db.Date
+
+  @@id([loanId, type, date])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String
+  action    String
+  entity    String
+  entityId  String
+  data      Json?
+  createdAt DateTime @default(now())
+}
