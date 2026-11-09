@@ -1,0 +1,18 @@
+.env
+.env.local
+node_modules/
+.superpowers/
+
+# next.js
+/.next/
+/out/
+/build/
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+npm-debug.log*
+.vercel
+/coverage
+/data/
+.env*
+!.env.example
