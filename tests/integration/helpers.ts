@@ -1,3 +1,6 @@
+import { vi } from "vitest";
+import { auth } from "@/auth";
+import type { SessionUser } from "@/server/auth/session";
 import { randomUUID } from "node:crypto";
 import type { Asset, Item, ItemKind, Loan, LoanStatus, User } from "@prisma/client";
 import { prisma } from "@/lib/db";
@@ -72,4 +75,21 @@ export async function makeLoan(o: {
       },
     },
   });
+}
+
+/**
+ * Session mocking pattern: a test file that needs a logged-in user must declare
+ *   vi.mock("@/auth", () => ({ auth: vi.fn() }));
+ * (vi.mock is hoisted per file, so it cannot live in this helper). Then call
+ * `mockSession(userId)` to make `auth()` resolve to a session for that user,
+ * or `mockSession(null)` for no session.
+ */
+export function mockSession(userId: string | null): void {
+  vi.mocked(auth).mockResolvedValue(
+    (userId ? { user: { id: userId }, expires: "2999-01-01T00:00:00.000Z" } : null) as never,
+  );
+}
+
+export function asSession(u: User): SessionUser {
+  return { id: u.id, name: u.name, email: u.email, role: u.role };
 }

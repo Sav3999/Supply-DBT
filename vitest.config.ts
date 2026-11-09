@@ -5,6 +5,7 @@ export default defineConfig({
   resolve: { alias: { "@": path.resolve(__dirname, "src") } },
   test: {
     environment: "node",
+    server: { deps: { inline: ["next-auth"] } },
     testTimeout: 20000,
     projects: [
       {
