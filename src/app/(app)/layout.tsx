@@ -4,6 +4,10 @@ import { signOut } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { navFor } from "@/components/nav";
 import { getCurrentUser } from "@/server/auth/session";
+import { NotificationBell } from "@/components/notification-bell";
+import { ensureWired } from "@/server/wiring";
+
+ensureWired();
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
@@ -23,6 +27,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               ระบบยืม-คืนของ
             </Link>
             <div className="flex items-center gap-2">
+              <NotificationBell />
               <span className="truncate text-sm text-muted-foreground">{user.name}</span>
               <form
                 action={async () => {

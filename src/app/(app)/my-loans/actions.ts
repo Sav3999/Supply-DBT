@@ -1,5 +1,6 @@
 "use server";
 
+import { ensureWired } from "@/server/wiring";
 import { revalidatePath } from "next/cache";
 import { toResult, type Result } from "@/lib/result";
 import { prisma } from "@/lib/db";
@@ -39,3 +40,5 @@ export async function cartItemsAction(ids: string[]): Promise<CartItemInfo[]> {
     select: { id: true, name: true, imagePath: true, active: true },
   });
 }
+
+ensureWired();

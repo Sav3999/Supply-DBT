@@ -1,5 +1,6 @@
 "use server";
 
+import { ensureWired } from "@/server/wiring";
 import { AuthError } from "next-auth";
 import { signIn } from "@/auth";
 import { toResult, type Result } from "@/lib/result";
@@ -41,3 +42,5 @@ export async function registerAction(_prev: RegisterState, formData: FormData): 
     return null;
   });
 }
+
+ensureWired();

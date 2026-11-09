@@ -12,7 +12,10 @@ export default auth((req) => {
   if (PUBLIC.some((p) => p.test(pathname))) return NextResponse.next();
 
   const user = req.auth?.user as { role?: string } | undefined;
-  if (!user) return NextResponse.redirect(new URL("/login", req.nextUrl.origin));
+  if (!user) {
+    if (pathname.startsWith("/api/")) return NextResponse.json({ error: "กรุณาเข้าสู่ระบบ" }, { status: 401 });
+    return NextResponse.redirect(new URL("/login", req.nextUrl.origin));
+  }
 
   const role = user.role;
   const isStaff = role === "STAFF" || role === "ADMIN";

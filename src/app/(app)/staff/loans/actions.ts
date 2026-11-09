@@ -1,5 +1,6 @@
 "use server";
 
+import { ensureWired } from "@/server/wiring";
 import type { Condition } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { toResult, type Result } from "@/lib/result";
@@ -76,3 +77,5 @@ export async function returnAction(_: ActionState, fd: FormData): Promise<Action
     await receiveReturn(actor, loanId, { serialized, quantity });
   });
 }
+
+ensureWired();

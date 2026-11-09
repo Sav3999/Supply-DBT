@@ -37,3 +37,10 @@ export function addDays(d: Date, n: number): Date {
 export function diffDaysInclusive(start: Date, end: Date): number {
   return Math.round((end.getTime() - start.getTime()) / DAY_MS) + 1;
 }
+
+const thaiFmt = new Intl.DateTimeFormat("th-TH", { dateStyle: "medium", timeZone: TZ });
+
+/** วันที่แบบไทย เช่น 9 พ.ย. 2569 */
+export function formatThaiDate(d: Date): string {
+  return thaiFmt.format(d);
+}
