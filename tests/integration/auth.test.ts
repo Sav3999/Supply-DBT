@@ -33,8 +33,11 @@ test("register calls the registered hook with the new user", async () => {
 });
 
 test("hook failure does not fail registration", async () => {
+  const spy = vi.spyOn(console, "error").mockImplementation(() => {});
   setUserRegisteredHandler(async () => { throw new Error("boom"); });
   await expect(registerUser(input)).resolves.toMatchObject({ email: "a@x.th" });
+  expect(spy).toHaveBeenCalled();
+  spy.mockRestore();
 });
 
 test("pending user cannot log in", async () => {
@@ -87,4 +90,15 @@ test("logAudit writes a row, also inside a transaction", async () => {
   const rows = await prisma.auditLog.findMany({ orderBy: { action: "asc" } });
   expect(rows).toHaveLength(2);
   expect(rows[0]).toMatchObject({ action: "x", entityId: "e1", data: { a: 1 } });
+});
+
+test("parallel wrong-password attempts cannot bypass the rate limit", async () => {
+  const u = await registerUser(input);
+  await prisma.user.update({ where: { id: u.id }, data: { status: "ACTIVE" } });
+  const t0 = new Date("2026-11-09T03:00:00Z");
+  const results = await Promise.allSettled(
+    Array.from({ length: 10 }, () => authorizeCredentials("a@x.th", "bad", t0)),
+  );
+  expect(results.every((r) => r.status === "rejected")).toBe(true);
+  await expect(authorizeCredentials("a@x.th", "12345678", t0)).rejects.toThrow("ลองใหม่อีกครั้งใน 15 นาที");
 });
