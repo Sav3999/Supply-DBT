@@ -1,8 +1,10 @@
 import { randomUUID } from "node:crypto";
 import type { Asset, Item, ItemKind, Loan, LoanStatus, User } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { assertTestDatabaseUrl } from "./dbGuard";
 
 export async function resetDb() {
+  assertTestDatabaseUrl(process.env.DATABASE_URL);
   const rows = await prisma.$queryRaw<{ tablename: string }[]>`
     SELECT tablename FROM pg_tables
     WHERE schemaname = 'public' AND tablename <> '_prisma_migrations'`;
