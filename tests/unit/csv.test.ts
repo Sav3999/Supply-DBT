@@ -45,3 +45,19 @@ test("parseHistoryFilter ignores invalid values", () => {
   expect(parseHistoryFilter(new URLSearchParams("status=RETURNED&to=2026-02-30")).status).toBe("RETURNED");
   expect(parseHistoryFilter(new URLSearchParams("to=2026-02-30")).to).toBeUndefined();
 });
+
+test("csv neutralises spreadsheet formulas in text cells only", () => {
+  const row = {
+    loanId: "L3",
+    borrowerName: '=HYPERLINK("x")',
+    department: "-5",
+    items: "@cmd",
+    startDate: d("2026-11-09"),
+    dueDate: d("2026-11-12"),
+    status: "BORROWED" as const,
+    returnedAt: null,
+  };
+  const csv = historyToCsv([row]);
+  expect(csv).toContain(`L3,"'=HYPERLINK(""x"")",'-5,'@cmd,2026-11-09,2026-11-12,`);
+  expect(historyToCsv([{ ...row, borrowerName: "\tx", department: "+1", items: "ok" }])).toContain(`L3,'\tx,'+1,ok,`);
+});

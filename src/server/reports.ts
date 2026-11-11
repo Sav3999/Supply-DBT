@@ -101,6 +101,11 @@ export async function searchHistory(filter: HistoryFilter, take = 200): Promise<
 
 const CSV_HEADER = ["เลขที่", "ผู้ยืม", "หน่วยงาน", "รายการ", "วันยืม", "กำหนดคืน", "สถานะ", "วันที่คืน"];
 
+/** ข้อความอิสระ: กัน formula injection ใน Excel ด้วย ' นำหน้าค่าที่ขึ้นต้นด้วย = + - @ tab CR (แล้วจึง quote ตาม RFC 4180) */
+function csvText(v: string): string {
+  return csvCell(/^[=+\-@\t\r]/.test(v) ? `'${v}` : v);
+}
+
 function csvCell(v: string): string {
   return /[",\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
 }
@@ -114,13 +119,16 @@ export function historyToCsv(rows: HistoryRow[]): string {
         r.borrowerName,
         r.department,
         r.items,
-        formatDateOnly(r.startDate),
-        formatDateOnly(r.dueDate),
-        STATUS_TH[r.status],
-        r.returnedAt ? formatDateOnly(todayBangkok(r.returnedAt)) : "",
-      ]
-        .map(csvCell)
-        .join(","),
+      ].map((v, i) => (i === 0 ? csvCell(v) : csvText(v))).join(",") +
+        "," +
+        [
+          formatDateOnly(r.startDate),
+          formatDateOnly(r.dueDate),
+          STATUS_TH[r.status],
+          r.returnedAt ? formatDateOnly(todayBangkok(r.returnedAt)) : "",
+        ]
+          .map(csvCell)
+          .join(","),
     );
   }
   return "﻿" + lines.join("\r\n") + "\r\n";
