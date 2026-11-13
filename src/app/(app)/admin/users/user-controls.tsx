@@ -2,11 +2,10 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
+import { ROLE_LABEL } from "@/lib/labels";
 import type { ActionState } from "./actions";
 
 type Action = (prev: ActionState, fd: FormData) => Promise<ActionState>;
-
-export const ROLE_LABEL = { BORROWER: "ผู้ยืม", STAFF: "เจ้าหน้าที่", ADMIN: "แอดมิน" } as const;
 
 export function ActionButton({
   action,

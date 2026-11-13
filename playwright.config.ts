@@ -2,6 +2,7 @@ import "dotenv/config";
 import { defineConfig } from "@playwright/test";
 import os from "node:os";
 import path from "node:path";
+import { assertTestDatabaseUrl } from "./tests/integration/dbGuard";
 
 const PORT = 3200;
 const BASE_URL = `http://localhost:${PORT}`;
@@ -10,6 +11,7 @@ const BASE_URL = `http://localhost:${PORT}`;
 const testDbUrl = process.env.DATABASE_URL_TEST;
 if (!testDbUrl) throw new Error("ต้องกำหนด DATABASE_URL_TEST ใน .env สำหรับ E2E");
 // global-setup reads this; `next build` / `next start` get the URL via webServer.env below
+assertTestDatabaseUrl(testDbUrl); // fail before `next build` starts if this is not a *_test database
 process.env.E2E_DATABASE_URL = testDbUrl;
 
 export default defineConfig({

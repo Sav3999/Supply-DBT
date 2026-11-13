@@ -21,6 +21,11 @@ async function login(page: Page, who: { email: string; password: string }, expec
   if (expectSuccess) await page.waitForURL((u) => !u.pathname.startsWith("/login"));
 }
 
+// loan status badge (Badge renders data-slot="badge"); exact match so "(คืนแล้ว 3)" text never counts
+function statusBadge(page: Page, label: string) {
+  return page.locator('[data-slot="badge"]').getByText(label, { exact: true });
+}
+
 async function unreadCount(page: Page): Promise<number> {
   const bell = page.getByRole("link", { name: /การแจ้งเตือน/ });
   await expect(bell).toHaveAttribute("aria-label", /\(\d+ ยังไม่อ่าน\)/);
@@ -62,6 +67,11 @@ test("register → approve user → request → approve → handover → partial
   const row = admin.page.getByRole("row").filter({ hasText: BORROWER.email });
   await row.getByRole("button", { name: "ยืนยัน" }).click();
   await expect(admin.page.getByRole("row").filter({ hasText: BORROWER.email })).toHaveCount(0);
+  // positive outcome: the user now shows as active (ใช้งาน) on the all-users tab
+  await admin.page.goto("/admin/users?tab=all");
+  await expect(
+    admin.page.getByRole("row").filter({ hasText: BORROWER.email }).locator('[data-slot="badge"]', { hasText: "ใช้งาน" }),
+  ).toBeVisible();
 
   // ผู้ยืม: ล็อกอิน -> เลือกของใส่ตะกร้า
   await login(b, BORROWER);
@@ -93,12 +103,15 @@ test("register → approve user → request → approve → handover → partial
   await s.goto("/staff/loans?status=PENDING");
   await s.getByRole("link", { name: /ผู้ยืมทดสอบ/ }).click();
   await s.getByRole("button", { name: "อนุมัติ", exact: true }).click();
-  await expect(s.getByText("อนุมัติแล้ว").first()).toBeVisible();
+  await expect(statusBadge(s, "อนุมัติแล้ว")).toBeVisible();
 
   // ส่งมอบ เลือก NB-0012
   await s.getByLabel("NB-0012").check();
   await s.getByRole("button", { name: "ยืนยันส่งมอบ" }).click();
-  await expect(s.getByText("กำลังยืม").first()).toBeVisible();
+  await expect(statusBadge(s, "กำลังยืม")).toBeVisible();
+  // NB-0012 is shown as the handed-over (not yet returned) asset of the laptop line
+  const laptopLine = s.getByRole("listitem").filter({ hasText: "โน้ตบุ๊ก" }).filter({ hasText: "NB-0012" });
+  await expect(laptopLine.getByText("NB-0012 · ยังไม่คืน")).toBeVisible();
 
   // รับคืนจอบ 3 (สภาพปกติ)
   await s.getByLabel("จำนวนคืน จอบ").fill("3");
@@ -117,7 +130,8 @@ test("register → approve user → request → approve → handover → partial
   await s.reload();
   await s.getByRole("checkbox", { name: "NB-0012" }).check();
   await s.getByRole("button", { name: "บันทึกรับคืน" }).click();
-  await expect(s.getByText("คืนแล้ว").first()).toBeVisible();
+  await expect(statusBadge(s, "คืนแล้ว")).toBeVisible();
+  await expect(laptopLine.getByText("NB-0012 · คืนแล้ว (ปกติ)")).toBeVisible();
 
   await b.goto(myLoanUrl);
   await expect(b.getByText("คืนแล้ว", { exact: true })).toBeVisible();
