@@ -8,7 +8,7 @@ Repository: https://github.com/Sav3999/Supply-DBT
 ## ฟีเจอร์หลัก
 
 - สมัครสมาชิก แล้วรอแอดมินอนุมัติบัญชีก่อนใช้งาน
-- ดูรายการวัสดุ/อุปกรณ์ พร้อมจำนวนที่ว่างในช่วงวันที่เลือก (ทั้งแบบนับจำนวนและแบบมีเลขครุภัณฑ์)
+- ดูรายการวัสดุ/อุปกรณ์ พร้อมจำนวนที่ว่างวันนี้ (ทั้งแบบนับจำนวนและแบบมีเลขครุภัณฑ์) ระบบตรวจของว่างในช่วงวันที่เลือกอีกครั้งตอนส่งคำขอและตอนอนุมัติ
 - ขอยืม -> เจ้าหน้าที่อนุมัติ -> รับของ -> รับคืน (บันทึกสภาพ: ปกติ/ชำรุด/สูญหาย)
 - แจ้งเตือนในระบบ และแจ้งเตือนผ่าน LINE (ผูกบัญชีด้วยรหัส 6 หลัก อายุ 10 นาที)
 - แจ้งเตือนอัตโนมัติรายวันสำหรับของที่ใกล้ถึงกำหนด/เกินกำหนดคืน (ผ่าน cron endpoint)
@@ -64,9 +64,8 @@ npm run lint
 | `DATABASE_URL` | URL ฐานข้อมูล (ใน Docker Compose จะถูกแทนที่ให้ชี้ไปที่บริการ `db` อัตโนมัติ) |
 | `DATABASE_URL_TEST` | ฐานข้อมูลสำหรับเทสต์ (ชื่อต้องลงท้าย `_test`) |
 | `POSTGRES_PASSWORD` | รหัสผ่านฐานข้อมูลของ Docker Compose (ค่าเริ่มต้น `postgres` ใช้ตอนพัฒนาเท่านั้น) มีผลเมื่อสร้าง volume `pgdata` ครั้งแรกเท่านั้น (เปลี่ยนภายหลังต้องเปลี่ยนในฐานข้อมูลเอง) และห้ามมีอักขระ `@ / # :` เว้นแต่ URL-encode แล้ว เพราะถูกนำไปต่อเป็น `DATABASE_URL` |
-| `AUTH_SECRET` | คีย์เซ็นเซสชัน สร้างด้วย `openssl rand -base64 32` |
+| `AUTH_SECRET` | คีย์เซ็นเซสชัน สร้างด้วย `openssl rand -base64 32` (production ไม่ยอมเริ่มทำงานถ้าว่าง สั้นกว่า 32 ตัว หรือยังเป็น `change-me`) |
 | `CRON_SECRET` | รหัสลับสำหรับเรียก endpoint แจ้งเตือนรายวัน |
-| `APP_URL` | URL จริงของเว็บ เช่น `https://borrow.example.com` |
 | `LINE_CHANNEL_SECRET`, `LINE_CHANNEL_ACCESS_TOKEN` | จาก LINE Developers Console |
 | `LINE_OA_ADD_FRIEND_URL` | ลิงก์เพิ่มเพื่อนของ LINE OA (แสดงในหน้าโปรไฟล์) |
 | `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` | อีเมล/รหัสผ่านแอดมินคนแรก (รหัสผ่านยาวอย่างน้อย 8 ตัว) |
@@ -76,7 +75,7 @@ npm run lint
 
 ```bash
 cp .env.example .env
-# แก้ .env: POSTGRES_PASSWORD, AUTH_SECRET, CRON_SECRET, APP_URL, SEED_ADMIN_*, LINE_*
+# แก้ .env: POSTGRES_PASSWORD, AUTH_SECRET, CRON_SECRET, SEED_ADMIN_*, LINE_*
 docker compose up -d --build app db
 ```
 
@@ -121,7 +120,7 @@ Webhook ต้องเป็น HTTPS ที่ใช้ได้จริง (
 
 คัดลอก `Caddyfile.example` เป็น `Caddyfile` แก้โดเมนให้เป็นของจริง แล้วติดตั้ง/รัน Caddy บนเครื่องเซิร์ฟเวอร์
 (เปิดพอร์ต 80 และ 443 และชี้ DNS ของโดเมนมาที่เครื่องนี้) Caddy จะขอและต่ออายุใบรับรองให้อัตโนมัติ
-แล้ว reverse proxy ไปที่ `localhost:3000` อย่าลืมตั้ง `APP_URL` เป็น `https://<โดเมน>`
+แล้ว reverse proxy ไปที่ `localhost:3000`
 
 ## สำรองและกู้คืนข้อมูล
 

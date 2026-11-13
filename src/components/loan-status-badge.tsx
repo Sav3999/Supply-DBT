@@ -1,14 +1,6 @@
 import type { LoanStatus } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
-
-export const LOAN_STATUS_LABEL: Record<LoanStatus, string> = {
-  PENDING: "รออนุมัติ",
-  APPROVED: "อนุมัติแล้ว",
-  BORROWED: "กำลังยืม",
-  RETURNED: "คืนแล้ว",
-  REJECTED: "ไม่อนุมัติ",
-  CANCELLED: "ยกเลิก",
-};
+import { LOAN_STATUS_LABEL } from "@/lib/labels";
 
 const VARIANT: Record<LoanStatus, "default" | "secondary" | "destructive" | "outline"> = {
   PENDING: "outline",

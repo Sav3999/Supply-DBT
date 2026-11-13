@@ -25,7 +25,7 @@ async function onLoanEvent(event: LoanEvent, loan: Loan): Promise<void> {
     case "HANDED_OVER":
       return notify([loan.borrowerId], `รับของเรียบร้อย กำหนดคืน ${formatThaiDate(loan.dueDate)}`, mine);
     case "RETURNED":
-      return notify([loan.borrowerId], "คืนของครบเรียบร้อย ขอบคุณครับ", mine);
+      return notify([loan.borrowerId], "คืนของครบเรียบร้อย ขอบคุณ", mine);
     case "CANCELLED":
       return; // spec lists no notification
   }

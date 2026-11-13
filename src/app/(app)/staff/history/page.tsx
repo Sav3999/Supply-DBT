@@ -3,9 +3,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { prisma } from "@/lib/db";
-import { formatDateOnly, todayBangkok } from "@/lib/dates";
+import { formatDateOnly, formatThaiDate } from "@/lib/dates";
 import { requirePageRole } from "@/server/auth/session";
-import { parseHistoryFilter, searchHistory, STATUS_TH } from "@/server/reports";
+import { LOAN_STATUS_LABEL } from "@/lib/labels";
+import { parseHistoryFilter, searchHistory } from "@/server/reports";
 
 export const dynamic = "force-dynamic";
 
@@ -72,7 +73,7 @@ export default async function StaffHistoryPage({
           <Label htmlFor="status">สถานะ</Label>
           <select id="status" name="status" defaultValue={filter.status ?? ""} className={selectClass}>
             <option value="">ทั้งหมด</option>
-            {Object.entries(STATUS_TH).map(([k, v]) => (
+            {Object.entries(LOAN_STATUS_LABEL).map(([k, v]) => (
               <option key={k} value={k}>
                 {v}
               </option>
@@ -107,10 +108,10 @@ export default async function StaffHistoryPage({
                 <TableCell>{r.borrowerName}</TableCell>
                 <TableCell>{r.department}</TableCell>
                 <TableCell className="min-w-48 whitespace-normal">{r.items}</TableCell>
-                <TableCell>{formatDateOnly(r.startDate)}</TableCell>
-                <TableCell>{formatDateOnly(r.dueDate)}</TableCell>
-                <TableCell>{STATUS_TH[r.status]}</TableCell>
-                <TableCell>{r.returnedAt ? formatDateOnly(todayBangkok(r.returnedAt)) : "-"}</TableCell>
+                <TableCell>{formatThaiDate(r.startDate)}</TableCell>
+                <TableCell>{formatThaiDate(r.dueDate)}</TableCell>
+                <TableCell>{LOAN_STATUS_LABEL[r.status]}</TableCell>
+                <TableCell>{r.returnedAt ? formatThaiDate(r.returnedAt) : "-"}</TableCell>
               </TableRow>
             ))}
           </TableBody>

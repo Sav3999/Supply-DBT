@@ -36,7 +36,6 @@ export default defineConfig({
       DATABASE_URL: testDbUrl,
       AUTH_SECRET: "e2e-only-secret-not-for-production-use-0123456789",
       AUTH_TRUST_HOST: "true",
-      APP_URL: BASE_URL,
       UPLOAD_DIR: path.join(os.tmpdir(), "borrow-e2e-uploads"),
     },
   },

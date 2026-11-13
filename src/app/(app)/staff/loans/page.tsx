@@ -3,7 +3,7 @@ import type { LoanStatus } from "@prisma/client";
 import { LoanStatusBadge } from "@/components/loan-status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatDateOnly, todayBangkok } from "@/lib/dates";
+import { formatThaiDate, todayBangkok } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { requirePageRole } from "@/server/auth/session";
 import { listLoansForStaff } from "@/server/loans/staff";
@@ -70,7 +70,7 @@ export default async function StaffLoansPage({
                   <LoanStatusBadge status={l.status} overdue={isOverdue(l, today)} />
                 </div>
                 <p className="text-sm">
-                  {formatDateOnly(l.startDate)} ถึง {formatDateOnly(l.dueDate)}
+                  {formatThaiDate(l.startDate)} ถึง {formatThaiDate(l.dueDate)}
                   <span className="text-muted-foreground"> · {l.borrower.department}</span>
                 </p>
                 <p className="truncate text-sm text-muted-foreground">

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { LoanStatusBadge } from "@/components/loan-status-badge";
-import { formatDateOnly, todayBangkok } from "@/lib/dates";
+import { formatThaiDate, todayBangkok } from "@/lib/dates";
 import { AppError } from "@/lib/result";
 import { requirePageRole } from "@/server/auth/session";
 import { getLoanForUser, type LoanWithItems } from "@/server/loans/request";
@@ -30,14 +30,14 @@ export default async function MyLoanDetailPage({ params }: { params: Promise<{ i
       </div>
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
         <dt className="text-muted-foreground">วันยืม</dt>
-        <dd>{formatDateOnly(loan.startDate)}</dd>
+        <dd>{formatThaiDate(loan.startDate)}</dd>
         <dt className="text-muted-foreground">กำหนดคืน</dt>
-        <dd>{formatDateOnly(loan.dueDate)}</dd>
+        <dd>{formatThaiDate(loan.dueDate)}</dd>
         <dt className="text-muted-foreground">เหตุผล</dt>
         <dd className="whitespace-pre-wrap">{loan.purpose}</dd>
         {loan.rejectReason && (
           <>
-            <dt className="text-muted-foreground">เหตุผลที่ไม่อนุมัติ</dt>
+            <dt className="text-muted-foreground">เหตุผลที่ปฏิเสธ</dt>
             <dd>{loan.rejectReason}</dd>
           </>
         )}
