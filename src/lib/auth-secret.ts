@@ -19,3 +19,14 @@ export function assertAuthSecret(env: { NODE_ENV?: string; AUTH_SECRET?: string 
   const problem = authSecretProblem(env);
   if (problem) throw new Error(problem);
 }
+
+/**
+ * ใช้ใน instrumentation: ถ้า AUTH_SECRET ใช้ไม่ได้ใน production ให้พิมพ์เหตุผลแล้วจบ process
+ * (การ throw ใน register() ทำให้ Next ยังเปิดพอร์ตแต่ตอบ 500 ทุกคำขอ — ไม่ใช่ "ไม่ยอมเริ่ม")
+ */
+export function exitOnBadAuthSecret(env: { NODE_ENV?: string; AUTH_SECRET?: string } = process.env): void {
+  const problem = authSecretProblem(env);
+  if (!problem) return;
+  console.error(`[startup] ${problem}`);
+  process.exit(1);
+}

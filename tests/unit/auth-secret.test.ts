@@ -22,3 +22,19 @@ describe("authSecretProblem", () => {
     expect(() => assertAuthSecret({ NODE_ENV: "production", AUTH_SECRET: GOOD })).not.toThrow();
   });
 });
+
+describe("exitOnBadAuthSecret", () => {
+  test("exits the process with code 1 on a bad production secret, otherwise no-op", async () => {
+    const { vi } = await import("vitest");
+    const { exitOnBadAuthSecret } = await import("@/lib/auth-secret");
+    const exit = vi.spyOn(process, "exit").mockImplementation((() => undefined) as never);
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    exitOnBadAuthSecret({ NODE_ENV: "production", AUTH_SECRET: GOOD });
+    expect(exit).not.toHaveBeenCalled();
+    exitOnBadAuthSecret({ NODE_ENV: "production", AUTH_SECRET: "change-me" });
+    expect(exit).toHaveBeenCalledWith(1);
+    expect(err.mock.calls[0][0]).toMatch(/AUTH_SECRET/);
+    exit.mockRestore();
+    err.mockRestore();
+  });
+});
