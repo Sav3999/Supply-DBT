@@ -45,11 +45,15 @@ npm run dev                   # เปิดที่ http://localhost:3000
 ```bash
 npm run test:unit   # unit test
 npm run test:int    # integration test (ต้องมีฐานข้อมูลทดสอบ)
+npm run test:e2e    # Playwright E2E (build แอป, รันที่พอร์ต 3200; ต้อง npx playwright install chromium ครั้งแรก)
 npm run lint
 ```
 
 `test:int` ต้องตั้ง `DATABASE_URL_TEST` ใน `.env` ให้ชี้ไปยังฐานข้อมูลที่**ชื่อลงท้ายด้วย `_test`**
 (เช่น `borrow_test`) เพราะเทสต์จะล้างข้อมูลทุกตารางก่อนแต่ละเคส ระบบมีตัวป้องกันไม่ให้รันกับฐานข้อมูลอื่น
+
+`test:int` และ `test:e2e` ใช้ฐานข้อมูลทดสอบ (`borrow_test`) ร่วมกัน และล้างข้อมูลทุกตารางเหมือนกัน
+จึง**ต้องรันทีละคำสั่งตามลำดับ ห้ามรันพร้อมกัน**
 
 ## ตั้งค่า `.env`
 

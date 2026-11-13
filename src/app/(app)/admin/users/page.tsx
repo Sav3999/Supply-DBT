@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils";
 import { requireRole } from "@/server/auth/session";
 import { listUsers } from "@/server/users";
 import { activateAction, approveAction, rejectAction, setRoleAction, suspendAction } from "./actions";
-import { ActionButton, ROLE_LABEL, RoleSelect } from "./user-controls";
+import { ROLE_LABEL } from "@/lib/labels";
+import { ActionButton, RoleSelect } from "./user-controls";
 
 const STATUS_LABEL = { PENDING: "รอยืนยัน", ACTIVE: "ใช้งาน", SUSPENDED: "ถูกระงับ" } as const;
 

@@ -7,7 +7,8 @@ import { requireRole } from "@/server/auth/session";
 import { getLoanForStaff, type StaffLoanDetail } from "@/server/loans/staff";
 import { isOverdue } from "@/server/loans/status";
 import { approveAction, cancelAction, handOverAction, rejectAction, returnAction } from "../actions";
-import { ActionButton, CONDITION_LABEL, HandOverForm, RejectForm, ReturnForm } from "../loan-controls";
+import { CONDITION_LABEL } from "@/lib/labels";
+import { ActionButton, HandOverForm, RejectForm, ReturnForm } from "../loan-controls";
 
 const dateTime = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", dateStyle: "medium", timeStyle: "short" });
 

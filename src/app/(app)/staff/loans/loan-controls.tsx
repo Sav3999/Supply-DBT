@@ -3,11 +3,10 @@
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { CONDITION_LABEL } from "@/lib/labels";
 import type { ActionState } from "./actions";
 
 type Action = (prev: ActionState, fd: FormData) => Promise<ActionState>;
-
-export const CONDITION_LABEL = { GOOD: "ปกติ", DAMAGED: "ชำรุด", LOST: "สูญหาย" } as const;
 
 function ErrorText({ state }: { state: ActionState }) {
   return state && !state.ok ? <p className="text-sm text-destructive">{state.error}</p> : null;
