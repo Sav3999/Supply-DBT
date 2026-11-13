@@ -16,3 +16,8 @@ npm-debug.log*
 /data/
 .env*
 !.env.example
+
+# playwright
+test-results/
+playwright-report/
+playwright/.cache/
