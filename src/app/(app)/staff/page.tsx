@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { todayBangkok } from "@/lib/dates";
-import { requireRole } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/session";
 import { dashboardCounts } from "@/server/reports";
 
 export const dynamic = "force-dynamic";
 
 export default async function StaffDashboardPage() {
-  await requireRole("STAFF");
+  await requirePageRole("STAFF");
   const c = await dashboardCounts(todayBangkok());
   const cards = [
     { label: "รออนุมัติ", n: c.pending, href: "/staff/loans?status=PENDING" },

@@ -406,3 +406,23 @@ test("getLoanForStaff includes borrower, available assets and assigned assets", 
   expect(line.availableAssets.map((a) => a.assetTag)).toEqual(["M-2"]);
   await expect(getLoanForStaff("nope")).rejects.toThrow("ไม่พบคำขอ");
 });
+
+test("approve reports every short item in one error", async () => {
+  const a = await makeItem({ kind: "QUANTITY", totalQuantity: 1 });
+  const b = await makeItem({ kind: "QUANTITY", totalQuantity: 1 });
+  await prisma.item.update({ where: { id: a.id }, data: { name: "สว่าน" } });
+  await prisma.item.update({ where: { id: b.id }, data: { name: "บันได" } });
+  await loanOf(a, 1, "APPROVED");
+  await loanOf(b, 1, "APPROVED");
+  const loan = await makeLoan({
+    borrowerId: borrower.id,
+    status: "PENDING",
+    startDate: START,
+    dueDate: DUE,
+    items: [{ itemId: a.id, quantity: 1 }, { itemId: b.id, quantity: 1 }],
+  });
+  const err = await approveLoan(staff(), loan.id).catch((e: Error) => e);
+  expect((err as Error).message).toMatch(/^ของไม่พอในช่วงวันที่เลือก: /);
+  expect((err as Error).message).toContain("สว่าน");
+  expect((err as Error).message).toContain("บันได");
+});

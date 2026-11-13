@@ -1,9 +1,9 @@
 import { addDays, formatDateOnly, todayBangkok } from "@/lib/dates";
-import { requireRole } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/session";
 import { CartForm } from "./cart-form";
 
 export default async function CartPage() {
-  await requireRole("BORROWER", "STAFF", "ADMIN");
+  await requirePageRole("BORROWER", "STAFF", "ADMIN");
   const today = todayBangkok();
   return (
     <div className="space-y-4">

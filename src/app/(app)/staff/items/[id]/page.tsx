@@ -2,14 +2,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { requireRole } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/session";
 import { listCategories } from "@/server/inventory/categories";
 import { getItem } from "@/server/inventory/items";
 import { addAssetAction, assetStatusAction, setActiveAction, updateItemAction, uploadImageAction } from "../actions";
 import { ActiveForm, AddAssetForm, AssetStatusSelect, ImageForm, ItemForm } from "../item-controls";
 
 export default async function StaffItemPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireRole("STAFF");
+  await requirePageRole("STAFF");
   const { id } = await params;
   const [item, categories] = await Promise.all([getItem(id), listCategories()]);
   if (!item) notFound();

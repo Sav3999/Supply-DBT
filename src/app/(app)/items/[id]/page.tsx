@@ -2,13 +2,13 @@ import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/db";
 import { todayBangkok } from "@/lib/dates";
-import { requireRole } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/session";
 import { getItem } from "@/server/inventory/items";
 import { availableQuantity } from "@/server/loans/availability";
 import { AddToCart } from "./add-to-cart";
 
 export default async function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireRole("BORROWER", "STAFF", "ADMIN");
+  await requirePageRole("BORROWER", "STAFF", "ADMIN");
   const { id } = await params;
   const item = await getItem(id);
   if (!item || !item.active) notFound();

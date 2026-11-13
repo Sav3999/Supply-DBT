@@ -138,3 +138,18 @@ test("emits CREATED after commit and survives handler failure", async () => {
   spy.mockRestore();
   setLoanEventHandler(async () => {});
 });
+
+test("reports every short item in one error", async () => {
+  const u = await makeUser();
+  const a = await makeItem({ kind: "QUANTITY", totalQuantity: 1 });
+  const b = await makeItem({ kind: "QUANTITY", totalQuantity: 5 });
+  const c = await makeItem({ kind: "QUANTITY", totalQuantity: 1 });
+  await prisma.item.update({ where: { id: a.id }, data: { name: "จอบ" } });
+  await prisma.item.update({ where: { id: c.id }, data: { name: "เสียม" } });
+  const req = { ...input(a.id), items: [{ itemId: a.id, quantity: 2 }, { itemId: b.id, quantity: 1 }, { itemId: c.id, quantity: 3 }] };
+  const err = await createLoan(asSession(u), req, NOW).catch((e: Error) => e);
+  expect((err as Error).message).toMatch(/^ของไม่พอในช่วงวันที่เลือก: /);
+  expect((err as Error).message).toContain("จอบ");
+  expect((err as Error).message).toContain("เสียม");
+  expect(await prisma.loan.count()).toBe(0);
+});

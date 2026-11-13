@@ -1,5 +1,6 @@
 import type { LoanStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { LOAN_STATUS_LABEL } from "@/lib/labels";
 import { formatDateOnly, parseDateOnly, todayBangkok } from "@/lib/dates";
 
 // ---------- dashboard ----------
@@ -29,16 +30,7 @@ export type HistoryRow = {
   returnedAt: Date | null;
 };
 
-export const STATUS_TH: Record<LoanStatus, string> = {
-  PENDING: "รออนุมัติ",
-  APPROVED: "อนุมัติแล้ว",
-  BORROWED: "กำลังยืม",
-  RETURNED: "คืนแล้ว",
-  REJECTED: "ปฏิเสธ",
-  CANCELLED: "ยกเลิก",
-};
-
-const STATUSES = Object.keys(STATUS_TH) as LoanStatus[];
+const STATUSES = Object.keys(LOAN_STATUS_LABEL) as LoanStatus[];
 
 function validDate(s: string | undefined): Date | undefined {
   if (!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return undefined;
@@ -124,7 +116,7 @@ export function historyToCsv(rows: HistoryRow[]): string {
         [
           formatDateOnly(r.startDate),
           formatDateOnly(r.dueDate),
-          STATUS_TH[r.status],
+          LOAN_STATUS_LABEL[r.status],
           r.returnedAt ? formatDateOnly(todayBangkok(r.returnedAt)) : "",
         ]
           .map(csvCell)

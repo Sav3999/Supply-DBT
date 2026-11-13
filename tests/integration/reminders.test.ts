@@ -104,3 +104,25 @@ describe("POST /api/cron/reminders", () => {
     expect(body).toHaveProperty("dueTomorrow");
   });
 });
+
+describe("reminder targeting", () => {
+  test("borrower reminders link to the loan", async () => {
+    const { borrower, mk } = await seed();
+    const due = await mk("BORROWED", "2026-11-10");
+    const late = await mk("BORROWED", "2026-11-07");
+    await runReminders(at("2026-11-09T01:05:00Z"));
+    const links = (await prisma.notification.findMany({ where: { userId: borrower.id } })).map((n) => n.link).sort();
+    expect(links).toEqual([`/my-loans/${due.id}`, `/my-loans/${late.id}`].sort());
+  });
+
+  test("suspended borrowers get no reminders; staff digest still counts their loans", async () => {
+    const { borrower, staff, mk } = await seed();
+    await mk("BORROWED", "2026-11-10");
+    await mk("BORROWED", "2026-11-07");
+    await prisma.user.update({ where: { id: borrower.id }, data: { status: "SUSPENDED" } });
+    const r = await runReminders(at("2026-11-09T01:05:00Z"));
+    expect(r).toMatchObject({ dueTomorrow: 0, overdue: 0, digest: true });
+    expect(await prisma.notification.count({ where: { userId: borrower.id } })).toBe(0);
+    expect(await prisma.notification.count({ where: { userId: staff.id } })).toBe(1);
+  });
+});

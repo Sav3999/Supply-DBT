@@ -52,12 +52,14 @@ export async function createLoan(actor: SessionUser, input: unknown, now: Date =
     }
     const err = validateLoanDates(start, due, items.map((i) => i.maxLoanDays), todayBangkok(now));
     if (err) throw new AppError(err);
+    const short: string[] = [];
     for (const line of v.items) {
       const item = byId.get(line.itemId)!;
-      if ((await availableQuantity(tx, item.id, start, due)) < line.quantity) {
-        throw new AppError(`ของไม่พอในช่วงวันที่เลือก: ${item.name}`);
+      if ((await availableQuantity(tx, item.id, start, due, undefined, todayBangkok(now))) < line.quantity) {
+        short.push(item.name);
       }
     }
+    if (short.length > 0) throw new AppError(`ของไม่พอในช่วงวันที่เลือก: ${short.join(", ")}`);
     const created = await tx.loan.create({
       data: {
         borrowerId: actor.id,

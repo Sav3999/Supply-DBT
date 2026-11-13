@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 import { authConfig } from "./auth.config";
 
-// Edge runtime: JWT only, no DB access. Server actions re-check roles.
+// Edge runtime: JWT only, no DB access. Only checks "logged in".
 const { auth } = NextAuth(authConfig);
 
 const PUBLIC = [/^\/login$/, /^\/register$/, /^\/logout$/, /^\/api\/auth(\/|$)/, /^\/api\/line\/webhook$/, /^\/api\/cron(\/|$)/, /^\/uploads(\/|$)/];
@@ -11,16 +11,14 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
   if (PUBLIC.some((p) => p.test(pathname))) return NextResponse.next();
 
-  const user = req.auth?.user as { role?: string } | undefined;
+  const user = req.auth?.user;
   if (!user) {
     if (pathname.startsWith("/api/")) return NextResponse.json({ error: "กรุณาเข้าสู่ระบบ" }, { status: 401 });
     return NextResponse.redirect(new URL("/login", req.nextUrl.origin));
   }
 
-  const role = user.role;
-  const isStaff = role === "STAFF" || role === "ADMIN";
-  if (/^\/staff(\/|$)/.test(pathname) && !isStaff) return NextResponse.redirect(new URL("/", req.nextUrl.origin));
-  if (/^\/admin(\/|$)/.test(pathname) && role !== "ADMIN") return NextResponse.redirect(new URL("/", req.nextUrl.origin));
+  // Role checks happen in pages (requirePageRole) and server actions (requireRole)
+  // against the DB role: the JWT role is only set at sign-in and goes stale.
   return NextResponse.next();
 });
 

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { requireRole } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/session";
 import { listAudit } from "@/server/reports";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +13,7 @@ const timeFmt = new Intl.DateTimeFormat("th-TH", {
 });
 
 export default async function AdminAuditPage({ searchParams }: { searchParams: Promise<{ action?: string }> }) {
-  await requireRole("ADMIN");
+  await requirePageRole("ADMIN");
   const action = (await searchParams).action?.trim() || undefined;
   const rows = await listAudit({ action, take: 200 });
 

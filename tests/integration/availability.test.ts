@@ -46,7 +46,17 @@ test("partial return frees quantity", async () => {
 test("counts overdue unreturned loans regardless of dates", async () => {
   const { u, item } = await setup(2);
   await makeLoan({ borrowerId: u.id, status: "BORROWED", startDate: d("2026-11-01"), dueDate: d("2026-11-03"), items: [{ itemId: item.id, quantity: 2 }] });
-  expect(await availableQuantity(prisma, item.id, d("2026-11-10"), d("2026-11-12"))).toBe(0);
+  // today pinned to 2026-11-09: due 11-03 is overdue; requested 11-10..11-12 doesn't overlap the loan
+  expect(await availableQuantity(prisma, item.id, d("2026-11-10"), d("2026-11-12"), undefined, d("2026-11-09"))).toBe(0);
+});
+
+test("BORROWED loan not yet overdue but due before start does not block advance booking", async () => {
+  const { u, item } = await setup(2);
+  // today 11-05; loan due 11-07 (not overdue yet); requested 11-10..11-12
+  await makeLoan({ borrowerId: u.id, status: "BORROWED", startDate: d("2026-11-04"), dueDate: d("2026-11-07"), items: [{ itemId: item.id, quantity: 2 }] });
+  expect(await availableQuantity(prisma, item.id, S, E, undefined, d("2026-11-05"))).toBe(2);
+  // once overdue (today 11-08) it counts regardless of dates
+  expect(await availableQuantity(prisma, item.id, S, E, undefined, d("2026-11-08"))).toBe(0);
 });
 
 test("APPROVED loan entirely in the past does not count", async () => {

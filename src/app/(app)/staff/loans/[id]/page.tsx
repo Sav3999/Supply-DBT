@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LoanStatusBadge } from "@/components/loan-status-badge";
-import { formatDateOnly, todayBangkok } from "@/lib/dates";
+import { formatThaiDate, todayBangkok } from "@/lib/dates";
 import { AppError } from "@/lib/result";
-import { requireRole } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/session";
 import { getLoanForStaff, type StaffLoanDetail } from "@/server/loans/staff";
 import { isOverdue } from "@/server/loans/status";
 import { approveAction, cancelAction, handOverAction, rejectAction, returnAction } from "../actions";
@@ -13,7 +13,7 @@ import { ActionButton, HandOverForm, RejectForm, ReturnForm } from "../loan-cont
 const dateTime = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", dateStyle: "medium", timeStyle: "short" });
 
 export default async function StaffLoanDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireRole("STAFF");
+  await requirePageRole("STAFF");
   const { id } = await params;
   let loan: StaffLoanDetail;
   try {
@@ -46,9 +46,9 @@ export default async function StaffLoanDetailPage({ params }: { params: Promise<
           </a>
         </dd>
         <dt className="text-muted-foreground">วันยืม</dt>
-        <dd>{formatDateOnly(loan.startDate)}</dd>
+        <dd>{formatThaiDate(loan.startDate)}</dd>
         <dt className="text-muted-foreground">กำหนดคืน</dt>
-        <dd>{formatDateOnly(loan.dueDate)}</dd>
+        <dd>{formatThaiDate(loan.dueDate)}</dd>
         <dt className="text-muted-foreground">เหตุผล</dt>
         <dd className="whitespace-pre-wrap">{loan.purpose}</dd>
         {loan.approver && (
@@ -59,7 +59,7 @@ export default async function StaffLoanDetailPage({ params }: { params: Promise<
         )}
         {loan.rejectReason && (
           <>
-            <dt className="text-muted-foreground">เหตุผลที่ไม่อนุมัติ</dt>
+            <dt className="text-muted-foreground">เหตุผลที่ปฏิเสธ</dt>
             <dd>{loan.rejectReason}</dd>
           </>
         )}

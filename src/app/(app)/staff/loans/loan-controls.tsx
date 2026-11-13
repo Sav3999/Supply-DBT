@@ -65,7 +65,7 @@ export function RejectForm({ action, loanId }: { action: Action; loanId: string 
   return (
     <form action={formAction} className="flex flex-col gap-2 rounded-lg border p-3">
       <input type="hidden" name="loanId" value={loanId} />
-      <Label htmlFor="reject-reason">เหตุผลที่ไม่อนุมัติ</Label>
+      <Label htmlFor="reject-reason">เหตุผลที่ปฏิเสธ</Label>
       <textarea
         id="reject-reason"
         name="reason"
@@ -75,7 +75,7 @@ export function RejectForm({ action, loanId }: { action: Action; loanId: string 
         className="rounded-lg border border-input bg-transparent px-3 py-2 text-base md:text-sm"
       />
       <Button type="submit" variant="destructive" size="lg" disabled={pending}>
-        ไม่อนุมัติ
+        ปฏิเสธ
       </Button>
       <ErrorText state={state} />
     </form>

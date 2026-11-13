@@ -6,6 +6,7 @@ import { registerUser } from "@/server/auth/register";
 import { FakeLineClient, NoopLineClient, setLineClient } from "@/server/line/client";
 import { listNotifications, markAllRead, notify, notifyRoles, unreadCount } from "@/server/notifications";
 import { ensureWired } from "@/server/wiring";
+import { emitLoanEvent } from "@/server/loans/events";
 import { asSession, makeItem, makeUser, resetDb } from "./helpers";
 
 vi.mock("@/auth", () => ({ auth: vi.fn() }));
@@ -69,6 +70,17 @@ describe("wiring", () => {
     const [n] = await listNotifications(admin.id);
     expect(n.message).toBe("มีผู้สมัครใหม่: สมชาย (บัญชี)");
     expect(n.link).toBe("/admin/users");
+  });
+
+  test("RETURNED message is gender-neutral and links to the loan", async () => {
+    const borrower = await makeUser();
+    const loan = await prisma.loan.create({
+      data: { borrowerId: borrower.id, status: "RETURNED", startDate: new Date("2026-11-10"), dueDate: new Date("2026-11-12"), purpose: "x" },
+    });
+    await emitLoanEvent("RETURNED", loan);
+    const [n] = await listNotifications(borrower.id);
+    expect(n.message).toBe("คืนของครบเรียบร้อย ขอบคุณ");
+    expect(n.link).toBe(`/my-loans/${loan.id}`);
   });
 
   test("create, approve and reject notify the right people", async () => {

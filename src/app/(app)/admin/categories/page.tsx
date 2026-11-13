@@ -1,11 +1,11 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { requireRole } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/session";
 import { listCategories } from "@/server/inventory/categories";
 import { createCategoryAction, deleteCategoryAction, renameCategoryAction } from "./actions";
 import { AddCategoryForm, DeleteForm, RenameForm } from "./category-controls";
 
 export default async function AdminCategoriesPage() {
-  await requireRole("ADMIN");
+  await requirePageRole("ADMIN");
   const categories = await listCategories();
   return (
     <div className="space-y-4">
