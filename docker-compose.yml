@@ -3,13 +3,36 @@ services:
     image: postgres:16
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      # ค่าเริ่มต้นใช้เฉพาะตอนพัฒนาในเครื่อง; ใน production ให้ตั้ง POSTGRES_PASSWORD ใน .env
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: borrow
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d borrow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
+  app:
+    build: .
+    env_file: .env
+    environment:
+      # ชี้ไปที่บริการ db ในเครือข่ายของ compose (ทับค่า localhost ใน .env)
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/borrow
+      UPLOAD_DIR: /data/uploads
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ใช้เฉพาะตอนพัฒนา/รันเทสต์ในเครื่อง (npm run test:int) ไม่จำเป็นบน production
   db-test:
     image: postgres:16
     environment:
@@ -17,7 +40,8 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: borrow_test
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
 
 volumes:
   pgdata:
+  uploads:
