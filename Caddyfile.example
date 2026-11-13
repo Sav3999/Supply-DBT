@@ -1,0 +1,10 @@
+# คัดลอกเป็น Caddyfile แล้วแก้โดเมนเป็นของจริง; Caddy ขอและต่ออายุใบรับรอง HTTPS ให้อัตโนมัติ
+# ต้องชี้ DNS ของโดเมนมาที่เซิร์ฟเวอร์ และเปิดพอร์ต 80/443
+borrow.example.com {
+	encode gzip
+	# ขนาดอัปโหลดสูงสุด (แอปจำกัดรูปไม่เกิน 5MB)
+	request_body {
+		max_size 8MB
+	}
+	reverse_proxy localhost:3000
+}
