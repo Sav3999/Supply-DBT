@@ -48,3 +48,9 @@ describe("seed", () => {
     expect(await prisma.user.count()).toBe(0);
   });
 });
+
+test("normalises a mixed-case admin email to lowercase (login lowercases)", async () => {
+  await seed(prisma, { ...env, SEED_ADMIN_EMAIL: "  Admin@Example.COM " });
+  expect(await prisma.user.findUnique({ where: { email: "admin@example.com" } })).toMatchObject({ role: "ADMIN" });
+  expect(await prisma.user.count()).toBe(1);
+});

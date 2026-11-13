@@ -9,7 +9,7 @@ export async function seed(
   db: PrismaClient,
   env: { SEED_ADMIN_EMAIL: string; SEED_ADMIN_PASSWORD: string },
 ): Promise<void> {
-  const email = env.SEED_ADMIN_EMAIL?.trim();
+  const email = env.SEED_ADMIN_EMAIL?.trim().toLowerCase();
   if (!email) throw new Error("ต้องกำหนด SEED_ADMIN_EMAIL");
   if (!env.SEED_ADMIN_PASSWORD || env.SEED_ADMIN_PASSWORD.length < 8) {
     throw new Error("SEED_ADMIN_PASSWORD ต้องยาวอย่างน้อย 8 ตัวอักษร");

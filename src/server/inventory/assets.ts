@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { AppError } from "@/lib/result";
 import { logAudit } from "@/server/audit";
 import { assertRole, type SessionUser } from "@/server/auth/session";
+import { lockItems } from "@/server/loans/locks";
 
 const STATUSES: AssetStatus[] = ["AVAILABLE", "REPAIR", "LOST", "RETIRED"];
 
@@ -31,8 +32,11 @@ export async function setAssetStatus(actor: SessionUser, assetId: string, status
   assertRole(actor, "STAFF");
   if (!STATUSES.includes(status)) throw new AppError("สถานะไม่ถูกต้อง");
   await prisma.$transaction(async (tx) => {
-    const asset = await tx.asset.findUnique({ where: { id: assetId } });
-    if (!asset) throw new AppError("ไม่พบเลขครุภัณฑ์");
+    const found = await tx.asset.findUnique({ where: { id: assetId }, select: { itemId: true } });
+    if (!found) throw new AppError("ไม่พบเลขครุภัณฑ์");
+    // capacity changes must serialise with approvals/hand-overs on the same Item
+    await lockItems(tx, [found.itemId]);
+    const asset = await tx.asset.findUniqueOrThrow({ where: { id: assetId } });
     const { count } = await tx.asset.updateMany({
       where: { id: assetId, status: { not: "ON_LOAN" } },
       data: { status },

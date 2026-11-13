@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ระบบยืม-คืนของ",
-  description: "ระบบยืม-คืนของ",
+  title: "เว็บไซต์คลังวัสดุ DBT",
+  description: "เว็บไซต์คลังวัสดุ DBT",
 };
 
 export default function RootLayout({

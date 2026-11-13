@@ -24,25 +24,27 @@ export async function runReminders(now: Date): Promise<ReminderResult> {
   const tomorrow = addDays(today, 1);
 
   const dueLoans = await prisma.loan.findMany({
-    where: { status: "BORROWED", dueDate: tomorrow },
+    where: { status: "BORROWED", dueDate: tomorrow, borrower: { status: "ACTIVE" } },
     select: { id: true, borrowerId: true, dueDate: true },
   });
   let dueTomorrow = 0;
   for (const loan of dueLoans) {
     if (!(await claim(loan.id, "DUE_TOMORROW", today))) continue;
-    await notify([loan.borrowerId], `พรุ่งนี้ (${formatThaiDate(loan.dueDate)}) ครบกำหนดคืนของ`);
+    await notify([loan.borrowerId], `พรุ่งนี้ (${formatThaiDate(loan.dueDate)}) ครบกำหนดคืนของ`, `/my-loans/${loan.id}`);
     dueTomorrow++;
   }
 
   const overdueLoans = await prisma.loan.findMany({
     where: { status: "BORROWED", dueDate: { lt: today } },
-    select: { id: true, borrowerId: true, dueDate: true },
+    select: { id: true, borrowerId: true, dueDate: true, borrower: { select: { status: true } } },
   });
   let overdue = 0;
   for (const loan of overdueLoans) {
+    // suspended borrowers get no reminders (staff digest still counts their loans)
+    if (loan.borrower.status !== "ACTIVE") continue;
     if (!(await claim(loan.id, "OVERDUE", today))) continue;
     const days = Math.round((today.getTime() - loan.dueDate.getTime()) / DAY_MS);
-    await notify([loan.borrowerId], `เกินกำหนดคืนแล้ว ${days} วัน กรุณาคืนของโดยเร็ว`);
+    await notify([loan.borrowerId], `เกินกำหนดคืนแล้ว ${days} วัน กรุณาคืนของโดยเร็ว`, `/my-loans/${loan.id}`);
     overdue++;
   }
 

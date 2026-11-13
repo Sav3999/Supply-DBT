@@ -49,10 +49,12 @@ export async function approveLoan(actor: SessionUser, loanId: string): Promise<v
         async (tx) => {
           const loan = await lockLoan(tx, loanId);
           if (loan.status !== "PENDING") throw new AppError(ALREADY);
+          const short: string[] = [];
           for (const li of loan.items) {
             const free = await availableQuantity(tx, li.itemId, loan.startDate, loan.dueDate, loanId);
-            if (free < li.quantity) throw new AppError(`ของไม่พอในช่วงวันที่เลือก: ${li.item.name}`);
+            if (free < li.quantity) short.push(li.item.name);
           }
+          if (short.length > 0) throw new AppError(`ของไม่พอในช่วงวันที่เลือก: ${short.join(", ")}`);
           await transition(tx, loanId, ["PENDING"], {
             status: "APPROVED",
             approverId: actor.id,
