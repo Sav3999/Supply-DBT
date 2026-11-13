@@ -1,15 +1,13 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { getCurrentUser } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/session";
 import { listNotifications } from "@/server/notifications";
 import { markAllReadAction } from "./actions";
 
 const fmt = new Intl.DateTimeFormat("th-TH", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Bangkok" });
 
 export default async function NotificationsPage() {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  const user = await requirePageRole("BORROWER", "STAFF", "ADMIN");
   const items = await listNotifications(user.id);
 
   return (

@@ -1,14 +1,12 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { LoanStatusBadge } from "@/components/loan-status-badge";
 import { formatDateOnly, todayBangkok } from "@/lib/dates";
-import { getCurrentUser } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/session";
 import { listMyLoans } from "@/server/loans/request";
 import { isOverdue } from "@/server/loans/status";
 
 export default async function MyLoansPage() {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  const user = await requirePageRole("BORROWER", "STAFF", "ADMIN");
   const loans = await listMyLoans(user);
   const today = todayBangkok();
 

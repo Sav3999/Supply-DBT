@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { prisma } from "@/lib/db";
 import { todayBangkok } from "@/lib/dates";
-import { requireRole } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/session";
 import { listCategories } from "@/server/inventory/categories";
 import { listItems } from "@/server/inventory/items";
 import { availableQuantity } from "@/server/loans/availability";
@@ -15,7 +15,7 @@ export default async function ItemsPage({
 }: {
   searchParams: Promise<{ q?: string; categoryId?: string }>;
 }) {
-  await requireRole("BORROWER", "STAFF", "ADMIN");
+  await requirePageRole("BORROWER", "STAFF", "ADMIN");
   const { q, categoryId } = await searchParams;
   const [items, categories] = await Promise.all([
     listItems({ q, categoryId: categoryId || undefined }),

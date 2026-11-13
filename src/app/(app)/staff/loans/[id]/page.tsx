@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { LoanStatusBadge } from "@/components/loan-status-badge";
 import { formatDateOnly, todayBangkok } from "@/lib/dates";
 import { AppError } from "@/lib/result";
-import { requireRole } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/session";
 import { getLoanForStaff, type StaffLoanDetail } from "@/server/loans/staff";
 import { isOverdue } from "@/server/loans/status";
 import { approveAction, cancelAction, handOverAction, rejectAction, returnAction } from "../actions";
@@ -13,7 +13,7 @@ import { ActionButton, HandOverForm, RejectForm, ReturnForm } from "../loan-cont
 const dateTime = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", dateStyle: "medium", timeStyle: "short" });
 
 export default async function StaffLoanDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireRole("STAFF");
+  await requirePageRole("STAFF");
   const { id } = await params;
   let loan: StaffLoanDetail;
   try {

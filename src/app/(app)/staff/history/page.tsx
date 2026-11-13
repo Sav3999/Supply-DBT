@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { prisma } from "@/lib/db";
 import { formatDateOnly, todayBangkok } from "@/lib/dates";
-import { requireRole } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/session";
 import { parseHistoryFilter, searchHistory, STATUS_TH } from "@/server/reports";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +17,7 @@ export default async function StaffHistoryPage({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  await requireRole("STAFF");
+  await requirePageRole("STAFF");
   const params = await searchParams;
   const filter = parseHistoryFilter(params);
   const [rows, items] = await Promise.all([

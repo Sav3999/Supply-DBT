@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { requireRole } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/session";
 import { listCategories } from "@/server/inventory/categories";
 import { listItems } from "@/server/inventory/items";
 import { createItemAction } from "./actions";
@@ -14,7 +14,7 @@ export default async function StaffItemsPage({
 }: {
   searchParams: Promise<{ q?: string; categoryId?: string; new?: string }>;
 }) {
-  await requireRole("STAFF");
+  await requirePageRole("STAFF");
   const { q, categoryId, new: isNew } = await searchParams;
   const [items, categories] = await Promise.all([
     listItems({ q, categoryId: categoryId || undefined, includeInactive: true }),

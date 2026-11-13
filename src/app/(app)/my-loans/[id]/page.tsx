@@ -1,15 +1,14 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { LoanStatusBadge } from "@/components/loan-status-badge";
 import { formatDateOnly, todayBangkok } from "@/lib/dates";
 import { AppError } from "@/lib/result";
-import { getCurrentUser } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/session";
 import { getLoanForUser, type LoanWithItems } from "@/server/loans/request";
 import { isOverdue } from "@/server/loans/status";
 import { CancelButton } from "../cancel-button";
 
 export default async function MyLoanDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  const user = await requirePageRole("BORROWER", "STAFF", "ADMIN");
   const { id } = await params;
   let loan: LoanWithItems;
   try {

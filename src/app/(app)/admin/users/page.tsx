@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { requireRole } from "@/server/auth/session";
+import { requirePageRole } from "@/server/auth/session";
 import { listUsers } from "@/server/users";
 import { activateAction, approveAction, rejectAction, setRoleAction, suspendAction } from "./actions";
 import { ROLE_LABEL } from "@/lib/labels";
@@ -17,7 +17,7 @@ export default async function AdminUsersPage({
 }: {
   searchParams: Promise<{ tab?: string; q?: string }>;
 }) {
-  const actor = await requireRole("ADMIN");
+  const actor = await requirePageRole("ADMIN");
   const { tab: tabParam, q } = await searchParams;
   const tab = tabParam === "all" ? "all" : "pending";
   const users = await listUsers(actor, tab === "pending" ? { status: "PENDING" } : { q });
