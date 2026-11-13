@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: borrow
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -24,7 +24,7 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@db:5432/borrow
       UPLOAD_DIR: /data/uploads
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     volumes:
       - uploads:/data/uploads
     depends_on:
@@ -40,7 +40,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: borrow_test
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
 
 volumes:
   pgdata:

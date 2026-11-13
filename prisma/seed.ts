@@ -1,4 +1,5 @@
 import "dotenv/config";
+import path from "node:path";
 import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../src/server/auth/password";
 
@@ -40,7 +41,8 @@ export async function seed(
 }
 
 // รันเฉพาะเมื่อสั่งตรง ๆ (tsx prisma/seed.ts หรือ node seed.cjs) ไม่รันตอน import จากเทสต์
-if (/[\/]seed\.(ts|cjs|js|mjs)$/.test(process.argv[1] ?? "")) {
+const ENTRY_NAMES = new Set(["seed.ts", "seed.cjs", "seed.js", "seed.mjs"]);
+if (ENTRY_NAMES.has(path.basename(process.argv[1] ?? ""))) {
   const db = new PrismaClient();
   seed(db, {
     SEED_ADMIN_EMAIL: process.env.SEED_ADMIN_EMAIL ?? "",

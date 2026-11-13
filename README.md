@@ -59,7 +59,7 @@ npm run lint
 | --- | --- |
 | `DATABASE_URL` | URL ฐานข้อมูล (ใน Docker Compose จะถูกแทนที่ให้ชี้ไปที่บริการ `db` อัตโนมัติ) |
 | `DATABASE_URL_TEST` | ฐานข้อมูลสำหรับเทสต์ (ชื่อต้องลงท้าย `_test`) |
-| `POSTGRES_PASSWORD` | รหัสผ่านฐานข้อมูลของ Docker Compose (ค่าเริ่มต้น `postgres` ใช้ตอนพัฒนาเท่านั้น) |
+| `POSTGRES_PASSWORD` | รหัสผ่านฐานข้อมูลของ Docker Compose (ค่าเริ่มต้น `postgres` ใช้ตอนพัฒนาเท่านั้น) มีผลเมื่อสร้าง volume `pgdata` ครั้งแรกเท่านั้น (เปลี่ยนภายหลังต้องเปลี่ยนในฐานข้อมูลเอง) และห้ามมีอักขระ `@ / # :` เว้นแต่ URL-encode แล้ว เพราะถูกนำไปต่อเป็น `DATABASE_URL` |
 | `AUTH_SECRET` | คีย์เซ็นเซสชัน สร้างด้วย `openssl rand -base64 32` |
 | `CRON_SECRET` | รหัสลับสำหรับเรียก endpoint แจ้งเตือนรายวัน |
 | `APP_URL` | URL จริงของเว็บ เช่น `https://borrow.example.com` |
@@ -123,11 +123,17 @@ Webhook ต้องเป็น HTTPS ที่ใช้ได้จริง (
 
 ```bash
 # สำรอง
-docker compose exec db pg_dump -U postgres borrow > backup.sql
+docker compose exec -T db pg_dump -U postgres borrow > backup.sql
 
-# กู้คืน (ควรทำกับฐานข้อมูลว่าง)
+# กู้คืน: หยุดแอป -> ลบและสร้างฐานข้อมูลใหม่ -> กู้คืน -> เริ่มแอป
+docker compose stop app
+docker compose exec -T db psql -U postgres -d postgres -c 'DROP DATABASE borrow WITH (FORCE)'
+docker compose exec -T db psql -U postgres -d postgres -c 'CREATE DATABASE borrow'
 docker compose exec -T db psql -U postgres borrow < backup.sql
+docker compose start app
 ```
+
+คำเตือน: การกู้คืนจะลบข้อมูลปัจจุบันทั้งหมดของฐานข้อมูล `borrow`
 
 อย่าลืมสำรองรูปที่อัปโหลดด้วย (volume `uploads`):
 
@@ -141,6 +147,6 @@ docker run --rm -v supply-dbt_uploads:/data -v "$PWD":/backup alpine tar czf /ba
 
 - เปลี่ยน `SEED_ADMIN_PASSWORD` ก่อน seed และเปลี่ยนรหัสผ่านแอดมินหลังเข้าสู่ระบบครั้งแรก
 - ตั้ง `AUTH_SECRET` ด้วย `openssl rand -base64 32` และ `CRON_SECRET` เป็นค่าสุ่มที่เดายาก
-- เปลี่ยน `POSTGRES_PASSWORD` และไม่เปิดพอร์ต 5432 สู่อินเทอร์เน็ต (ลบ `ports` ของ `db` ใน `docker-compose.yml` บน production)
+- เปลี่ยน `POSTGRES_PASSWORD` (compose เปิดพอร์ตของ `db` และ `app` เฉพาะ `127.0.0.1` อยู่แล้ว ให้เข้าจากภายนอกผ่าน Caddy เท่านั้น)
 - ห้าม commit ไฟล์ `.env`
 - ใช้ HTTPS เสมอบน production
