@@ -15,7 +15,7 @@ import {
 function Msg({ state, ok }: { state: ActionState; ok: string }) {
   if (!state) return null;
   return state.ok ? (
-    <p className="text-sm text-green-700">{ok}</p>
+    <p className="text-sm text-status-returned">{ok}</p>
   ) : (
     <p role="alert" className="text-sm text-destructive">
       {state.error}

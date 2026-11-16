@@ -4,12 +4,42 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * คลังวัสดุ DBT — brand tokens (see docs/brand/README.md).
+ * White + blue UI. Logo colors are decoration only; buttons/links use
+ * --brand-blue, a darker shade of the logo cyan that passes WCAG AA on white.
+ */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-code);
+  --font-heading: var(--font-display);
+
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-blue-strong: var(--brand-blue-strong);
+  --color-brand-surface: var(--brand-surface);
+  --color-brand-tint: var(--brand-tint);
+  --color-logo-cyan: var(--logo-cyan);
+  --color-logo-violet: var(--logo-violet);
+  --color-logo-magenta: var(--logo-magenta);
+  --color-logo-teal: var(--logo-teal);
+
+  --color-status-pending: var(--status-pending);
+  --color-status-pending-bg: var(--status-pending-bg);
+  --color-status-approved: var(--status-approved);
+  --color-status-approved-bg: var(--status-approved-bg);
+  --color-status-borrowed: var(--status-borrowed);
+  --color-status-borrowed-bg: var(--status-borrowed-bg);
+  --color-status-returned: var(--status-returned);
+  --color-status-returned-bg: var(--status-returned-bg);
+  --color-status-rejected: var(--status-rejected);
+  --color-status-rejected-bg: var(--status-rejected-bg);
+  --color-status-cancelled: var(--status-cancelled);
+  --color-status-cancelled-bg: var(--status-cancelled-bg);
+  --color-status-overdue: var(--status-overdue);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,72 +79,97 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  /* Brand */
+  --brand-blue: #0b7bc0;
+  --brand-blue-strong: #08639b;
+  --brand-surface: #f3f8fd;
+  --brand-tint: #e3f0fc;
+  --brand-line: #dce8f5;
+  --brand-ink: #0f2a47;
+  --brand-slate: #4a6380;
+  --logo-cyan: #25aae2;
+  --logo-violet: #432b7f;
+  --logo-magenta: #b24c9f;
+  --logo-teal: #0abea5;
+
+  /* Loan status (LoanStatus enum) */
+  --status-pending: #8a5a0b;
+  --status-pending-bg: #fff3db;
+  --status-approved: #08639b;
+  --status-approved-bg: #e3f0fc;
+  --status-borrowed: #3a3fa8;
+  --status-borrowed-bg: #e9eafb;
+  --status-returned: #17744c;
+  --status-returned-bg: #e2f5eb;
+  --status-rejected: #b3332d;
+  --status-rejected-bg: #fce9e8;
+  --status-cancelled: #56657a;
+  --status-cancelled-bg: #eef2f6;
+  --status-overdue: #d13a33;
+
+  /* shadcn semantic tokens */
+  --background: #ffffff;
+  --foreground: var(--brand-ink);
+  --card: #ffffff;
+  --card-foreground: var(--brand-ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--brand-ink);
+  --primary: var(--brand-blue);
+  --primary-foreground: #ffffff;
+  --secondary: var(--brand-tint);
+  --secondary-foreground: var(--brand-blue-strong);
+  --muted: var(--brand-surface);
+  --muted-foreground: var(--brand-slate);
+  --accent: var(--brand-tint);
+  --accent-foreground: var(--brand-ink);
+  --destructive: var(--status-rejected);
+  --border: var(--brand-line);
+  --input: var(--brand-line);
+  --ring: var(--brand-blue);
+  --chart-1: var(--brand-blue);
+  --chart-2: var(--logo-cyan);
+  --chart-3: var(--logo-teal);
+  --chart-4: var(--logo-violet);
+  --chart-5: var(--logo-magenta);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: var(--brand-surface);
+  --sidebar-foreground: var(--brand-ink);
+  --sidebar-primary: var(--brand-blue);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--brand-tint);
+  --sidebar-accent-foreground: var(--brand-ink);
+  --sidebar-border: var(--brand-line);
+  --sidebar-ring: var(--brand-blue);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --brand-blue: #4dbbee;
+  --brand-blue-strong: #7fd0f4;
+  --brand-surface: #102033;
+  --brand-tint: #13304f;
+  --brand-line: #1f3652;
+  --brand-ink: #e6f0fa;
+  --brand-slate: #9db3cb;
+
+  --status-pending: #f2c46d;
+  --status-pending-bg: #3a2c10;
+  --status-approved: #7fd0f4;
+  --status-approved-bg: #13304f;
+  --status-borrowed: #a9aef5;
+  --status-borrowed-bg: #23264f;
+  --status-returned: #6fd3a2;
+  --status-returned-bg: #10362a;
+  --status-rejected: #f2918c;
+  --status-rejected-bg: #3d1a19;
+  --status-cancelled: #a3b1c2;
+  --status-cancelled-bg: #1c2a3a;
+  --status-overdue: #f0716a;
+
+  --background: #0b1622;
+  --card: #102033;
+  --popover: #102033;
+  --primary-foreground: #06182c;
+  --sidebar-primary-foreground: #06182c;
 }
 
 @layer base {
@@ -126,5 +181,10 @@
   }
   html {
     @apply font-sans;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading);
   }
 }
