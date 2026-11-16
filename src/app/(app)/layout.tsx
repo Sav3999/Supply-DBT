@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { navFor } from "@/components/nav";
 import { getCurrentUser } from "@/server/auth/session";
 import { NotificationBell } from "@/components/notification-bell";
+import { BrandLogo } from "@/components/brand-logo";
 import { ensureWired } from "@/server/wiring";
 
 ensureWired();
@@ -23,8 +24,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <header className="border-b bg-background">
         <div className="mx-auto flex max-w-5xl flex-col gap-2 p-3">
           <div className="flex items-center justify-between gap-2">
-            <Link href="/" className="font-semibold">
-              เว็บไซต์คลังวัสดุ DBT
+            <Link href="/" aria-label="คลังวัสดุ DBT หน้าแรก">
+              <BrandLogo />
             </Link>
             <div className="flex items-center gap-2">
               <NotificationBell />
