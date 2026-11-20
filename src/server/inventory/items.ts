@@ -7,18 +7,46 @@ import { assertRole, type SessionUser } from "@/server/auth/session";
 import { outstandingQuantity } from "@/server/loans/availability";
 import { saveUpload } from "./upload";
 
-export const itemSchema = z.object({
-  name: z.string().trim().min(1, "กรุณากรอกชื่อของ"),
-  categoryId: z.string().min(1, "กรุณาเลือกหมวดหมู่"),
-  description: z.string().trim().optional(),
-  kind: z.enum(["SERIALIZED", "QUANTITY"], { error: "ประเภทไม่ถูกต้อง" }),
-  totalQuantity: z.coerce.number().int("จำนวนต้องเป็นจำนวนเต็ม").min(0, "จำนวนต้องไม่ติดลบ").default(0),
-  maxLoanDays: z.coerce
-    .number()
-    .int("จำนวนวันต้องเป็นจำนวนเต็ม")
-    .min(1, "ยืมได้อย่างน้อย 1 วัน")
-    .max(365, "ยืมได้สูงสุด 365 วัน"),
-});
+const THAI_DIGITS = "๐๑๒๓๔๕๖๗๘๙";
+
+/**
+ * Number from a form field. Empty → undefined (so "required" can report it in Thai
+ * instead of z.coerce silently turning "" into 0); Thai digits ๐–๙ are accepted.
+ */
+function formNumber(value: unknown): unknown {
+  if (typeof value !== "string") return value ?? undefined;
+  const s = value.trim().replace(/[๐-๙]/g, (d) => String(THAI_DIGITS.indexOf(d)));
+  if (s === "") return undefined;
+  return /^-?\d+(\.\d+)?$/.test(s) ? Number(s) : Number.NaN;
+}
+
+export const itemSchema = z
+  .object({
+    name: z.string().trim().min(1, "กรุณากรอกชื่อของ"),
+    categoryId: z.string().min(1, "กรุณาเลือกหมวดหมู่"),
+    description: z.string().trim().optional(),
+    kind: z.enum(["SERIALIZED", "QUANTITY"], { error: "ประเภทไม่ถูกต้อง" }),
+    totalQuantity: z.preprocess(
+      formNumber,
+      z.number({ error: "จำนวนต้องเป็นตัวเลข" }).int("จำนวนต้องเป็นจำนวนเต็ม").min(0, "จำนวนต้องไม่ติดลบ").optional(),
+    ),
+    maxLoanDays: z.preprocess(
+      formNumber,
+      z
+        .number({
+          error: (iss) => (iss.input === undefined ? "กรุณากรอกจำนวนวันที่ยืมได้" : "จำนวนวันต้องเป็นตัวเลข"),
+        })
+        .int("จำนวนวันต้องเป็นจำนวนเต็ม")
+        .min(1, "ยืมได้อย่างน้อย 1 วัน")
+        .max(365, "ยืมได้สูงสุด 365 วัน"),
+    ),
+  })
+  .superRefine((v, ctx) => {
+    if (v.kind === "QUANTITY" && v.totalQuantity === undefined) {
+      ctx.addIssue({ code: "custom", path: ["totalQuantity"], message: "กรุณากรอกจำนวนรวม" });
+    }
+  })
+  .transform((v) => ({ ...v, totalQuantity: v.totalQuantity ?? 0 }));
 export type ItemInput = z.input<typeof itemSchema>;
 
 export type ItemWithRefs = Item & { category: Category; assets: Asset[] };

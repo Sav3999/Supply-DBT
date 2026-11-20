@@ -16,8 +16,9 @@ function itemInput(fd: FormData): ItemInput {
     categoryId: String(fd.get("categoryId") ?? ""),
     description: String(fd.get("description") ?? ""),
     kind: String(fd.get("kind") ?? "") as ItemInput["kind"],
-    totalQuantity: String(fd.get("totalQuantity") ?? "0") as unknown as number,
-    maxLoanDays: String(fd.get("maxLoanDays") ?? "") as unknown as number,
+    // raw text: itemSchema reports empty/non-numeric values in Thai instead of saving 0
+    totalQuantity: String(fd.get("totalQuantity") ?? ""),
+    maxLoanDays: String(fd.get("maxLoanDays") ?? ""),
   };
 }
 
