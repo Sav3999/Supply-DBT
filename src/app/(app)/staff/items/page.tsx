@@ -67,6 +67,7 @@ export default async function StaffItemsPage({
                 <TableHead>ประเภท</TableHead>
                 <TableHead>จำนวน</TableHead>
                 <TableHead>สถานะ</TableHead>
+                <TableHead className="text-right">จัดการ</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -82,6 +83,15 @@ export default async function StaffItemsPage({
                   <TableCell>{i.kind === "SERIALIZED" ? i.assets.length : i.totalQuantity}</TableCell>
                   <TableCell>
                     <Badge variant={i.active ? "default" : "secondary"}>{i.active ? "เปิดใช้งาน" : "ปิดใช้งาน"}</Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Link
+                      href={`/staff/items/${i.id}`}
+                      aria-label={`แก้ไข ${i.name}`}
+                      className="inline-flex h-8 items-center rounded-lg border border-input px-3 text-sm hover:bg-muted"
+                    >
+                      แก้ไข
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))}
