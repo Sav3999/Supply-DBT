@@ -1,10 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
+import { startTransition, useActionState, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { shrinkImage } from "@/lib/image-fit";
 import type { ActionState } from "./actions";
+
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 type Action = (prev: ActionState, fd: FormData) => Promise<ActionState>;
 
@@ -87,15 +90,28 @@ export function ItemForm({
       {(!item || item.kind === "QUANTITY") && (
         <div className="space-y-1">
           <Label htmlFor="totalQuantity">จำนวนรวม (เฉพาะของนับเป็นจำนวน)</Label>
-          <Input id="totalQuantity" name="totalQuantity" type="number" min={0} defaultValue={item?.totalQuantity ?? 0} />
+          <Input
+            id="totalQuantity"
+            name="totalQuantity"
+            inputMode="numeric"
+            autoComplete="off"
+            defaultValue={item?.totalQuantity ?? 0}
+          />
+          <p className="text-xs text-muted-foreground">ใส่จำนวนทั้งหมดที่มี เช่น มี 10 ชิ้น ใส่ 10</p>
         </div>
+      )}
+      {item?.kind === "SERIALIZED" && (
+        <p className="text-sm text-muted-foreground">
+          ของประเภทนี้นับจำนวนจากเลขครุภัณฑ์ เพิ่มจำนวนได้ที่ส่วน &quot;เลขครุภัณฑ์&quot; ด้านล่าง
+        </p>
       )}
       <div className="space-y-1">
         <Label htmlFor="maxLoanDays">ยืมได้สูงสุด (วัน)</Label>
-        <Input id="maxLoanDays" name="maxLoanDays" type="number" min={1} max={365} required defaultValue={item?.maxLoanDays ?? 7} />
+        <Input id="maxLoanDays" name="maxLoanDays" inputMode="numeric" autoComplete="off" required defaultValue={item?.maxLoanDays ?? 7} />
       </div>
       <Err state={state} />
       {state?.ok && <p className="text-xs text-muted-foreground">บันทึกแล้ว</p>}
+      {!item && <p className="text-xs text-muted-foreground">เพิ่มรูปและเลขครุภัณฑ์ได้ในหน้าถัดไปหลังกดเพิ่มของ</p>}
       <Button type="submit" disabled={pending}>
         {item ? "บันทึก" : "เพิ่มของ"}
       </Button>
@@ -105,13 +121,43 @@ export function ItemForm({
 
 export function ImageForm({ action, id }: { action: Action; id: string }) {
   const [state, formAction, pending] = useActionState(action, null);
+  const [preparing, startPreparing] = useTransition();
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const file = (form.elements.namedItem("image") as HTMLInputElement | null)?.files?.[0];
+    setLocalError(null);
+    if (!file) {
+      setLocalError("กรุณาเลือกไฟล์รูป");
+      return;
+    }
+    startPreparing(async () => {
+      // phone photos are often over 5MB — shrink in the browser before sending
+      const small = await shrinkImage(file);
+      if (small.size > MAX_IMAGE_BYTES) {
+        setLocalError("ไฟล์ใหญ่เกิน 5MB และย่อขนาดอัตโนมัติไม่ได้ ลองใช้รูป jpg หรือ png");
+        return;
+      }
+      const fd = new FormData();
+      fd.set("id", id);
+      fd.set("image", small);
+      // after an await the outer transition context is gone, so dispatch in a fresh one
+      startTransition(() => formAction(fd));
+      form.reset();
+    });
+  }
+
+  const busy = pending || preparing;
   return (
-    <form action={formAction} className="space-y-2">
-      <input type="hidden" name="id" value={id} />
+    <form onSubmit={onSubmit} className="space-y-2">
       <Input name="image" type="file" accept="image/jpeg,image/png,image/webp" required aria-label="รูปภาพ" />
+      {localError && <p className="text-xs text-destructive">{localError}</p>}
       <Err state={state} />
-      <Button type="submit" size="sm" variant="outline" disabled={pending}>
-        อัปโหลดรูป
+      {state?.ok && !busy && <p className="text-xs text-muted-foreground">อัปโหลดรูปแล้ว</p>}
+      <Button type="submit" size="sm" variant="outline" disabled={busy}>
+        {busy ? "กำลังอัปโหลด..." : "อัปโหลดรูป"}
       </Button>
     </form>
   );
