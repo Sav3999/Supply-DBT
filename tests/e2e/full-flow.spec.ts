@@ -94,7 +94,8 @@ test("register → approve user → request → approve → handover → partial
   await b.getByLabel("เหตุผลการยืม").fill("ใช้งานโครงการทดสอบ E2E");
   await b.getByRole("button", { name: "ส่งคำขอยืม" }).click();
   await expect(b).toHaveURL(/\/my-loans\/[^/]+$/);
-  await expect(b.getByText("รออนุมัติ")).toBeVisible();
+  await expect(statusBadge(b, "รออนุมัติ")).toBeVisible();
+  await expect(b.getByText("ส่งคำขอเรียบร้อยแล้ว")).toBeVisible();
   const myLoanUrl = b.url();
 
   // เจ้าหน้าที่: อนุมัติ
@@ -123,7 +124,7 @@ test("register → approve user → request → approve → handover → partial
   // (ตาม spec §7 / wiring.ts การคืนบางส่วนไม่สร้างแจ้งเตือน ณ จุดนี้จึงมี 2: อนุมัติ + ส่งมอบ;
   //  แจ้งเตือนที่ 3 "คืนของครบ" เกิดหลังรับคืนครบ จึงตรวจ >= 3 ท้ายเทสต์)
   await b.goto(myLoanUrl);
-  await expect(b.getByText("กำลังยืม")).toBeVisible();
+  await expect(statusBadge(b, "กำลังยืม")).toBeVisible();
   expect(await unreadCount(b)).toBeGreaterThanOrEqual(2);
 
   // เจ้าหน้าที่: รับคืน NB-0012 -> ผู้ยืมเห็นคืนแล้ว
@@ -134,7 +135,7 @@ test("register → approve user → request → approve → handover → partial
   await expect(laptopLine.getByText("NB-0012 · คืนแล้ว (ปกติ)")).toBeVisible();
 
   await b.goto(myLoanUrl);
-  await expect(b.getByText("คืนแล้ว", { exact: true })).toBeVisible();
+  await expect(statusBadge(b, "คืนแล้ว")).toBeVisible();
   expect(await unreadCount(b)).toBeGreaterThanOrEqual(3);
 
   await Promise.all([borrower.context.close(), admin.context.close(), staff.context.close()]);
