@@ -32,8 +32,8 @@ export function ProfileForm({ user }: { user: { name: string; department: string
         <Input id="name" name="name" defaultValue={user.name} required />
       </div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="department">หน่วยงาน</Label>
-        <Input id="department" name="department" defaultValue={user.department} required />
+        <Label htmlFor="department">ชั้นปี</Label>
+        <Input id="department" name="department" defaultValue={user.department} required placeholder="เช่น ปวช.2, ปวส.1 หรือ ครู" />
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="phone">เบอร์โทร</Label>

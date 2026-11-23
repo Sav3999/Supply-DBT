@@ -52,7 +52,7 @@ test("register → approve user → request → approve → handover → partial
   await b.getByLabel("ชื่อ-นามสกุล").fill("ผู้ยืมทดสอบ");
   await b.getByLabel("อีเมล").fill(BORROWER.email);
   await b.getByLabel("รหัสผ่าน").fill(BORROWER.password);
-  await b.getByLabel("หน่วยงาน").fill("ฝ่ายทดสอบ");
+  await b.getByLabel("ชั้นปี").fill("ปวส.1");
   await b.getByLabel("เบอร์โทร").fill("0822222222");
   await b.getByRole("button", { name: "สมัครใช้งาน" }).click();
   await expect(b.getByText("รอแอดมินยืนยัน")).toBeVisible();

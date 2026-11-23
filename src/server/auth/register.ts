@@ -8,7 +8,7 @@ export const registerSchema = z.object({
   name: z.string().trim().min(1, "กรุณากรอกชื่อ"),
   email: z.string().trim().toLowerCase().pipe(z.email("อีเมลไม่ถูกต้อง")),
   password: z.string().min(8, "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร"),
-  department: z.string().trim().min(1, "กรุณากรอกหน่วยงาน"),
+  department: z.string().trim().min(1, "กรุณากรอกชั้นปี"),
   phone: z.string().trim().min(1, "กรุณากรอกเบอร์โทร"),
 });
 
