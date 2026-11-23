@@ -19,8 +19,10 @@ const ADMIN: NavItem[] = [
   { label: "Audit Log", href: "/admin/audit" },
 ];
 
+const HELP: NavItem = { label: "วิธีใช้", href: "/help" };
+
 export function navFor(role: Role): NavItem[] {
-  if (role === "ADMIN") return [...BORROWER, ...STAFF, ...ADMIN];
-  if (role === "STAFF") return [...BORROWER, ...STAFF];
-  return BORROWER;
+  if (role === "ADMIN") return [...BORROWER, ...STAFF, ...ADMIN, HELP];
+  if (role === "STAFF") return [...BORROWER, ...STAFF, HELP];
+  return [...BORROWER, HELP];
 }
