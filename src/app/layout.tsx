@@ -23,7 +23,7 @@ const code = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "คลังวัสดุ DBT",
+  title: "ระบบคลังวัสดุ DBT",
   description: "ระบบยืม-คืนวัสดุและอุปกรณ์ สาขาเทคโนโลยีธุรกิจดิจิทัล (DBT)",
 };
 

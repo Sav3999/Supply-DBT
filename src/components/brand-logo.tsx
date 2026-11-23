@@ -15,7 +15,7 @@ export function BrandLogo({ size = 36, showName = true }: { size?: number; showN
       </span>
       {showName && (
         <span className="font-heading text-lg leading-none font-bold text-foreground">
-          คลังวัสดุ <span className="text-primary">DBT</span>
+          ระบบคลังวัสดุ <span className="text-primary">DBT</span>
         </span>
       )}
     </span>

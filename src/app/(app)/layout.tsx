@@ -24,7 +24,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <header className="border-b bg-background">
         <div className="mx-auto flex max-w-5xl flex-col gap-2 p-3">
           <div className="flex items-center justify-between gap-2">
-            <Link href="/" aria-label="คลังวัสดุ DBT หน้าแรก">
+            <Link href="/" aria-label="ระบบคลังวัสดุ DBT หน้าแรก">
               <BrandLogo />
             </Link>
             <div className="flex items-center gap-2">
