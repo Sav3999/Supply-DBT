@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * คลังวัสดุ DBT — brand tokens (see docs/brand/README.md).
+ * ระบบคลังวัสดุ DBT — brand tokens (see docs/brand/README.md).
  * White + blue UI. Logo colors are decoration only; buttons/links use
  * --brand-blue, a darker shade of the logo cyan that passes WCAG AA on white.
  */
