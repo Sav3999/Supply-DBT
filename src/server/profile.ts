@@ -7,7 +7,7 @@ import type { SessionUser } from "@/server/auth/session";
 
 const profileSchema = z.object({
   name: z.string().trim().min(1, "กรุณากรอกชื่อ"),
-  department: z.string().trim().min(1, "กรุณากรอกหน่วยงาน"),
+  department: z.string().trim().min(1, "กรุณากรอกชั้นปี"),
   phone: z.string().trim().min(1, "กรุณากรอกเบอร์โทร"),
 });
 

@@ -37,7 +37,7 @@ export default async function StaffLoanDetailPage({ params }: { params: Promise<
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
         <dt className="text-muted-foreground">ผู้ยืม</dt>
         <dd>{loan.borrower.name}</dd>
-        <dt className="text-muted-foreground">แผนก</dt>
+        <dt className="text-muted-foreground">ชั้นปี</dt>
         <dd>{loan.borrower.department}</dd>
         <dt className="text-muted-foreground">โทร</dt>
         <dd>

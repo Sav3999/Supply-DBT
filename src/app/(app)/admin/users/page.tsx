@@ -56,7 +56,7 @@ export default async function AdminUsersPage({
               <TableRow>
                 <TableHead>ชื่อ</TableHead>
                 <TableHead>อีเมล</TableHead>
-                <TableHead>แผนก</TableHead>
+                <TableHead>ชั้นปี</TableHead>
                 <TableHead>สถานะ</TableHead>
                 <TableHead>บทบาท</TableHead>
                 <TableHead>การดำเนินการ</TableHead>

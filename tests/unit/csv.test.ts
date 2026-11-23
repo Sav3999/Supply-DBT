@@ -15,7 +15,7 @@ test("csv has BOM, Thai header, escapes", () => {
       returnedAt: null,
     },
   ]);
-  expect(csv.startsWith("﻿เลขที่,ผู้ยืม,หน่วยงาน,รายการ,วันยืม,กำหนดคืน,สถานะ,วันที่คืน\r\n")).toBe(true);
+  expect(csv.startsWith("﻿เลขที่,ผู้ยืม,ชั้นปี,รายการ,วันยืม,กำหนดคืน,สถานะ,วันที่คืน\r\n")).toBe(true);
   expect(csv).toContain('L1,"ก ""ข""","IT, ฝ่าย",จอบ x3,2026-11-09,2026-11-12,กำลังยืม,');
 });
 

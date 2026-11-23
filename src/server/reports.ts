@@ -91,7 +91,7 @@ export async function searchHistory(filter: HistoryFilter, take = 200): Promise<
   }));
 }
 
-const CSV_HEADER = ["เลขที่", "ผู้ยืม", "หน่วยงาน", "รายการ", "วันยืม", "กำหนดคืน", "สถานะ", "วันที่คืน"];
+const CSV_HEADER = ["เลขที่", "ผู้ยืม", "ชั้นปี", "รายการ", "วันยืม", "กำหนดคืน", "สถานะ", "วันที่คืน"];
 
 /** ข้อความอิสระ: กัน formula injection ใน Excel ด้วย ' นำหน้าค่าที่ขึ้นต้นด้วย = + - @ tab CR (แล้วจึง quote ตาม RFC 4180) */
 function csvText(v: string): string {

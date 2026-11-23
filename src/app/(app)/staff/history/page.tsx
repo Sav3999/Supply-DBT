@@ -94,7 +94,7 @@ export default async function StaffHistoryPage({
           <TableHeader>
             <TableRow>
               <TableHead>ผู้ยืม</TableHead>
-              <TableHead>หน่วยงาน</TableHead>
+              <TableHead>ชั้นปี</TableHead>
               <TableHead>รายการ</TableHead>
               <TableHead>วันยืม</TableHead>
               <TableHead>กำหนดคืน</TableHead>
