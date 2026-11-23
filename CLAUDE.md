@@ -5,6 +5,7 @@ Thai-language borrow/return web app for the DBT department. Next.js 15 (App Rout
 - Spec: `docs/superpowers/specs/2026-11-09-borrow-return-design.md`
 - Plan: `docs/superpowers/plans/2026-11-09-borrow-return.md`
 - Setup / deploy (Thai): `README.md`
+- Domain terms: `GLOSSARY.md` — use these words in UI copy, notes and discussion (e.g. ชั้นปี not หน่วยงาน, ผู้พิจารณา for whoever approves or rejects)
 
 ## Rules
 - All UI copy and error messages in Thai. Dates/"today" use Asia/Bangkok (`todayBangkok()`), never server-local time.
