@@ -6,6 +6,7 @@ import { navFor } from "@/components/nav";
 import { getCurrentUser } from "@/server/auth/session";
 import { NotificationBell } from "@/components/notification-bell";
 import { BrandLogo } from "@/components/brand-logo";
+import { PageHelpBanner } from "@/components/page-help-banner";
 import { ensureWired } from "@/server/wiring";
 
 ensureWired();
@@ -55,7 +56,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl p-4">{children}</main>
+      <main className="mx-auto max-w-5xl p-4">
+        <PageHelpBanner />
+        {children}
+      </main>
     </div>
   );
 }

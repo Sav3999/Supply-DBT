@@ -1,3 +1,4 @@
+import type { LoanStatus } from "@prisma/client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LoanStatusBadge } from "@/components/loan-status-badge";
@@ -9,6 +10,15 @@ import { isOverdue } from "@/server/loans/status";
 import { approveAction, cancelAction, handOverAction, rejectAction, returnAction } from "../actions";
 import { CONDITION_LABEL } from "@/lib/labels";
 import { ActionButton, HandOverForm, RejectForm, ReturnForm } from "../loan-controls";
+
+const STAFF_NEXT_STEP: Record<LoanStatus, string> = {
+  PENDING: "ตรวจรายการแล้วกด “อนุมัติ” หรือ “ปฏิเสธ” (ต้องใส่เหตุผล) — ระบบแจ้งผู้ยืมให้อัตโนมัติ",
+  APPROVED: "รอผู้ยืมมารับของ เมื่อมารับให้เลือกเลขครุภัณฑ์แล้วกด “ส่งมอบ”",
+  BORROWED: "ผู้ยืมกำลังยืมอยู่ เมื่อนำมาคืนให้เลือกชิ้นหรือจำนวนที่คืน พร้อมสภาพ แล้วกด “รับคืน” (คืนบางส่วนได้)",
+  RETURNED: "คืนครบแล้ว ไม่ต้องทำอะไรต่อ ดูย้อนหลังได้ที่เมนู “ประวัติ”",
+  REJECTED: "ปฏิเสธแล้ว ไม่ต้องทำอะไรต่อ",
+  CANCELLED: "ยกเลิกแล้ว ไม่ต้องทำอะไรต่อ",
+};
 
 const dateTime = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", dateStyle: "medium", timeStyle: "short" });
 
@@ -33,6 +43,7 @@ export default async function StaffLoanDetailPage({ params }: { params: Promise<
         <h1 className="text-xl font-semibold">คำขอยืม</h1>
         <LoanStatusBadge status={loan.status} overdue={isOverdue(loan, todayBangkok())} />
       </div>
+      <p className="text-sm text-muted-foreground">ขั้นต่อไป: {STAFF_NEXT_STEP[loan.status]}</p>
 
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
         <dt className="text-muted-foreground">ผู้ยืม</dt>

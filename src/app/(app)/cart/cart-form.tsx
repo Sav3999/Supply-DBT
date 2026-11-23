@@ -50,7 +50,7 @@ export function CartForm({ today, tomorrow }: { today: string; tomorrow: string 
       const res = await createLoanAction({ startDate, dueDate, purpose, items: lines });
       if (res.ok) {
         clearCart();
-        router.push(`/my-loans/${res.data.id}`);
+        router.push(`/my-loans/${res.data.id}?sent=1`);
       } else {
         setError(res.error);
       }
