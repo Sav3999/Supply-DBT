@@ -18,7 +18,7 @@ export type LineEvent = {
 };
 
 export async function createLinkCode(
-  userId: string,
+  userId: number,
   now: Date = new Date(),
 ): Promise<{ code: string; expiresAt: Date }> {
   const expiresAt = new Date(now.getTime() + CODE_TTL_MS);
@@ -38,7 +38,7 @@ export async function createLinkCode(
   throw new Error("สร้างรหัสไม่สำเร็จ กรุณาลองใหม่");
 }
 
-export async function unlinkLine(userId: string): Promise<void> {
+export async function unlinkLine(userId: number): Promise<void> {
   await prisma.user.update({ where: { id: userId }, data: { lineUserId: null } });
 }
 

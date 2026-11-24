@@ -5,7 +5,7 @@ import { historyToCsv, parseHistoryFilter } from "@/server/reports";
 test("csv has BOM, Thai header, escapes", () => {
   const csv = historyToCsv([
     {
-      loanId: "L1",
+      loanId: 1,
       borrowerName: 'ก "ข"',
       department: "IT, ฝ่าย",
       items: "จอบ x3",
@@ -16,13 +16,13 @@ test("csv has BOM, Thai header, escapes", () => {
     },
   ]);
   expect(csv.startsWith("﻿เลขที่,ผู้ยืม,ชั้นปี,รายการ,วันยืม,กำหนดคืน,สถานะ,วันที่คืน\r\n")).toBe(true);
-  expect(csv).toContain('L1,"ก ""ข""","IT, ฝ่าย",จอบ x3,2026-11-09,2026-11-12,กำลังยืม,');
+  expect(csv).toContain('1,"ก ""ข""","IT, ฝ่าย",จอบ x3,2026-11-09,2026-11-12,กำลังยืม,');
 });
 
 test("csv quotes newlines and formats returned date in Bangkok", () => {
   const csv = historyToCsv([
     {
-      loanId: "L2",
+      loanId: 2,
       borrowerName: "a\nb",
       department: "x",
       items: "y",
@@ -32,7 +32,7 @@ test("csv quotes newlines and formats returned date in Bangkok", () => {
       returnedAt: new Date("2026-11-11T18:00:00Z"), // 01:00 on 12th in Bangkok
     },
   ]);
-  expect(csv).toContain('L2,"a\nb",x,y,2026-11-09,2026-11-12,คืนแล้ว,2026-11-12');
+  expect(csv).toContain('2,"a\nb",x,y,2026-11-09,2026-11-12,คืนแล้ว,2026-11-12');
 });
 
 test("parseHistoryFilter ignores invalid values", () => {
@@ -48,7 +48,7 @@ test("parseHistoryFilter ignores invalid values", () => {
 
 test("csv neutralises spreadsheet formulas in text cells only", () => {
   const row = {
-    loanId: "L3",
+    loanId: 3,
     borrowerName: '=HYPERLINK("x")',
     department: "-5",
     items: "@cmd",
@@ -58,6 +58,6 @@ test("csv neutralises spreadsheet formulas in text cells only", () => {
     returnedAt: null,
   };
   const csv = historyToCsv([row]);
-  expect(csv).toContain(`L3,"'=HYPERLINK(""x"")",'-5,'@cmd,2026-11-09,2026-11-12,`);
-  expect(historyToCsv([{ ...row, borrowerName: "\tx", department: "+1", items: "ok" }])).toContain(`L3,'\tx,'+1,ok,`);
+  expect(csv).toContain(`3,"'=HYPERLINK(""x"")",'-5,'@cmd,2026-11-09,2026-11-12,`);
+  expect(historyToCsv([{ ...row, borrowerName: "\tx", department: "+1", items: "ok" }])).toContain(`3,'\tx,'+1,ok,`);
 });

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { AssetStatus } from "@prisma/client";
 import { AppError, toResult, type Result } from "@/lib/result";
+import { requireId } from "@/lib/id";
 import { requireRole } from "@/server/auth/session";
 import { addAsset, setAssetStatus } from "@/server/inventory/assets";
 import { createItem, setItemActive, setItemImage, updateItem, type ItemInput } from "@/server/inventory/items";
@@ -32,7 +33,7 @@ export async function createItemAction(_: ActionState, fd: FormData): Promise<Ac
 export async function updateItemAction(_: ActionState, fd: FormData): Promise<ActionState> {
   const id = String(fd.get("id"));
   const result = await toResult(async () => {
-    await updateItem(await requireRole("STAFF"), id, itemInput(fd));
+    await updateItem(await requireRole("STAFF"), requireId(id), itemInput(fd));
   });
   revalidatePath("/staff/items");
   revalidatePath(`/staff/items/${id}`);
@@ -45,7 +46,7 @@ export async function uploadImageAction(_: ActionState, fd: FormData): Promise<A
     const actor = await requireRole("STAFF");
     const file = fd.get("image");
     if (!(file instanceof File) || file.size === 0) throw new AppError("กรุณาเลือกไฟล์รูป");
-    await setItemImage(actor, id, file);
+    await setItemImage(actor, requireId(id), file);
   });
   revalidatePath(`/staff/items/${id}`);
   return result;
@@ -54,7 +55,7 @@ export async function uploadImageAction(_: ActionState, fd: FormData): Promise<A
 export async function setActiveAction(_: ActionState, fd: FormData): Promise<ActionState> {
   const id = String(fd.get("id"));
   const result = await toResult(async () => {
-    await setItemActive(await requireRole("STAFF"), id, fd.get("active") === "true");
+    await setItemActive(await requireRole("STAFF"), requireId(id), fd.get("active") === "true");
   });
   revalidatePath("/staff/items");
   revalidatePath(`/staff/items/${id}`);
@@ -64,7 +65,7 @@ export async function setActiveAction(_: ActionState, fd: FormData): Promise<Act
 export async function addAssetAction(_: ActionState, fd: FormData): Promise<ActionState> {
   const id = String(fd.get("id"));
   const result = await toResult(async () => {
-    await addAsset(await requireRole("STAFF"), id, String(fd.get("assetTag") ?? ""));
+    await addAsset(await requireRole("STAFF"), requireId(id), String(fd.get("assetTag") ?? ""));
   });
   revalidatePath(`/staff/items/${id}`);
   return result;
@@ -74,7 +75,7 @@ export async function assetStatusAction(_: ActionState, fd: FormData): Promise<A
   const result = await toResult(async () => {
     await setAssetStatus(
       await requireRole("STAFF"),
-      String(fd.get("assetId")),
+      requireId(fd.get("assetId")),
       String(fd.get("status")) as AssetStatus,
     );
   });

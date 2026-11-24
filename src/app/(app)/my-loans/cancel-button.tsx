@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { cancelLoanAction } from "./actions";
 
-export function CancelButton({ loanId }: { loanId: string }) {
+export function CancelButton({ loanId }: { loanId: number }) {
   const [state, formAction, pending] = useActionState(cancelLoanAction, null);
   return (
     <form

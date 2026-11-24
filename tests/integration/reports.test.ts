@@ -58,12 +58,12 @@ test("searchHistory filters by borrower and date range, builds items string", as
 
 test("listAudit filters by action, newest first", async () => {
   const u = await makeUser();
-  await logAudit(prisma, { actorId: u.id, action: "A", entity: "Loan", entityId: "1" });
-  await logAudit(prisma, { actorId: u.id, action: "B", entity: "Loan", entityId: "2" });
+  await logAudit(prisma, { actorId: u.id, action: "A", entity: "Loan", entityId: 1 });
+  await logAudit(prisma, { actorId: u.id, action: "B", entity: "Loan", entityId: 2 });
   const rows = await listAudit({});
   expect(rows.map((r) => r.action)).toEqual(["B", "A"]);
   expect(rows[0].actorName).toBe(u.name);
-  expect((await listAudit({ action: "A" })).map((r) => r.entityId)).toEqual(["1"]);
+  expect((await listAudit({ action: "A" })).map((r) => r.entityId)).toEqual([1]);
 });
 
 test("csv route requires STAFF", async () => {

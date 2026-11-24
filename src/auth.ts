@@ -23,7 +23,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const email = typeof credentials?.email === "string" ? credentials.email : "";
         const password = typeof credentials?.password === "string" ? credentials.password : "";
         try {
-          return await authorizeCredentials(email, password);
+          const user = await authorizeCredentials(email, password);
+          return { ...user, id: String(user.id) };
         } catch (e) {
           if (e instanceof AppError) throw new ThaiCredentialsError(e.message);
           throw e;

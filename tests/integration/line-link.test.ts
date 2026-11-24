@@ -24,7 +24,7 @@ const textEvent = (userId: string, text: string) => ({
   source: { userId },
   message: { type: "text", text },
 });
-const getUser = (id: string) => prisma.user.findUniqueOrThrow({ where: { id } });
+const getUser = (id: number) => prisma.user.findUniqueOrThrow({ where: { id } });
 
 describe("createLinkCode", () => {
   test("makes a 6-digit code expiring in 10 minutes and replaces the old one", async () => {

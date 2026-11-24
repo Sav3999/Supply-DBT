@@ -1,3 +1,4 @@
+import { parseId } from "@/lib/id";
 import type { LoanStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { LOAN_STATUS_LABEL } from "@/lib/labels";
@@ -17,10 +18,10 @@ export async function dashboardCounts(today: Date) {
 
 // ---------- history ----------
 
-export type HistoryFilter = { borrowerQ?: string; itemId?: string; from?: Date; to?: Date; status?: LoanStatus };
+export type HistoryFilter = { borrowerQ?: string; itemId?: number; from?: Date; to?: Date; status?: LoanStatus };
 
 export type HistoryRow = {
-  loanId: string;
+  loanId: number;
   borrowerName: string;
   department: string;
   items: string;
@@ -46,7 +47,7 @@ export function parseHistoryFilter(params: URLSearchParams | Record<string, stri
   const status = get("status");
   return {
     borrowerQ: borrower || undefined,
-    itemId: itemId || undefined,
+    itemId: parseId(itemId) ?? undefined,
     from: validDate(get("from")),
     to: validDate(get("to")),
     status: STATUSES.find((s) => s === status),
@@ -107,7 +108,7 @@ export function historyToCsv(rows: HistoryRow[]): string {
   for (const r of rows) {
     lines.push(
       [
-        r.loanId,
+        String(r.loanId),
         r.borrowerName,
         r.department,
         r.items,

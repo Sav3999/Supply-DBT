@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { getLineClient } from "@/server/line/client";
 
 /** บันทึกแจ้งเตือนในเว็บ แล้วส่ง LINE (ถ้าผูกบัญชี); ความล้มเหลวของ LINE ไม่ throw */
-export async function notify(userIds: string[], message: string, link?: string): Promise<void> {
+export async function notify(userIds: number[], message: string, link?: string): Promise<void> {
   const ids = [...new Set(userIds)];
   if (ids.length === 0) return;
   await prisma.notification.createMany({
@@ -37,14 +37,14 @@ export async function notifyRoles(roles: Role[], message: string, link?: string)
   );
 }
 
-export function listNotifications(userId: string, take = 50) {
+export function listNotifications(userId: number, take = 50) {
   return prisma.notification.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take });
 }
 
-export function unreadCount(userId: string): Promise<number> {
+export function unreadCount(userId: number): Promise<number> {
   return prisma.notification.count({ where: { userId, readAt: null } });
 }
 
-export async function markAllRead(userId: string): Promise<void> {
+export async function markAllRead(userId: number): Promise<void> {
   await prisma.notification.updateMany({ where: { userId, readAt: null }, data: { readAt: new Date() } });
 }

@@ -6,7 +6,7 @@ import { addToCart } from "@/components/cart-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export function AddToCart({ itemId }: { itemId: string }) {
+export function AddToCart({ itemId }: { itemId: number }) {
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
   return (

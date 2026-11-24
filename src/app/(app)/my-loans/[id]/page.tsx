@@ -1,3 +1,4 @@
+import { parseId } from "@/lib/id";
 import type { LoanStatus } from "@prisma/client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -26,7 +27,8 @@ export default async function MyLoanDetailPage({
   searchParams: Promise<{ sent?: string }>;
 }) {
   const user = await requirePageRole("BORROWER", "STAFF", "ADMIN");
-  const { id } = await params;
+  const id = parseId((await params).id);
+  if (id === null) notFound();
   const { sent } = await searchParams;
   let loan: LoanWithItems;
   try {

@@ -27,7 +27,7 @@ export default async function StaffHistoryPage({
   ]);
   const qs = new URLSearchParams();
   if (filter.borrowerQ) qs.set("borrower", filter.borrowerQ);
-  if (filter.itemId) qs.set("itemId", filter.itemId);
+  if (filter.itemId) qs.set("itemId", String(filter.itemId));
   if (filter.from) qs.set("from", formatDateOnly(filter.from));
   if (filter.to) qs.set("to", formatDateOnly(filter.to));
   if (filter.status) qs.set("status", filter.status);

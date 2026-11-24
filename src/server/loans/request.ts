@@ -23,7 +23,7 @@ export const loanRequestSchema = z.object({
   items: z
     .array(
       z.object({
-        itemId: z.string().min(1),
+        itemId: z.coerce.number({ error: "ข้อมูลไม่ถูกต้อง" }).int("ข้อมูลไม่ถูกต้อง").positive("ข้อมูลไม่ถูกต้อง"),
         quantity: z.number().int("จำนวนต้องเป็นจำนวนเต็ม").min(1, "จำนวนต้องไม่น้อยกว่า 1"),
       }),
     )
@@ -83,7 +83,7 @@ export async function createLoan(actor: SessionUser, input: unknown, now: Date =
   return loan;
 }
 
-export async function cancelLoan(actor: SessionUser, loanId: string): Promise<void> {
+export async function cancelLoan(actor: SessionUser, loanId: number): Promise<void> {
   const cancelled = await prisma.$transaction(async (tx) => {
     const loan = await tx.loan.findUnique({ where: { id: loanId } });
     if (!loan) throw new AppError("ไม่พบคำขอ");
@@ -109,7 +109,7 @@ export async function listMyLoans(actor: SessionUser): Promise<LoanWithItems[]> 
   });
 }
 
-export async function getLoanForUser(actor: SessionUser, loanId: string): Promise<LoanWithItems> {
+export async function getLoanForUser(actor: SessionUser, loanId: number): Promise<LoanWithItems> {
   const loan = await prisma.loan.findUnique({ where: { id: loanId }, include: withItems });
   if (!loan) throw new AppError("ไม่พบคำขอ");
   if (loan.borrowerId !== actor.id && actor.role === "BORROWER") throw new AppError("ไม่มีสิทธิ์");

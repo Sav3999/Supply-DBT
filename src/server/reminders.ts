@@ -29,7 +29,7 @@ export async function runReminders(now: Date): Promise<ReminderResult> {
   });
   let dueTomorrow = 0;
   for (const loan of dueLoans) {
-    if (!(await claim(loan.id, "DUE_TOMORROW", today))) continue;
+    if (!(await claim(String(loan.id), "DUE_TOMORROW", today))) continue;
     await notify([loan.borrowerId], `พรุ่งนี้ (${formatThaiDate(loan.dueDate)}) ครบกำหนดคืนของ`, `/my-loans/${loan.id}`);
     dueTomorrow++;
   }
@@ -42,7 +42,7 @@ export async function runReminders(now: Date): Promise<ReminderResult> {
   for (const loan of overdueLoans) {
     // suspended borrowers get no reminders (staff digest still counts their loans)
     if (loan.borrower.status !== "ACTIVE") continue;
-    if (!(await claim(loan.id, "OVERDUE", today))) continue;
+    if (!(await claim(String(loan.id), "OVERDUE", today))) continue;
     const days = Math.round((today.getTime() - loan.dueDate.getTime()) / DAY_MS);
     await notify([loan.borrowerId], `เกินกำหนดคืนแล้ว ${days} วัน กรุณาคืนของโดยเร็ว`, `/my-loans/${loan.id}`);
     overdue++;

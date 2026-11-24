@@ -13,7 +13,7 @@ async function setup(total = 2) {
   const item = await makeItem({ kind: "QUANTITY", totalQuantity: total });
   return { u, item };
 }
-const input = (itemId: string, quantity = 1, extra: object = {}) => ({
+const input = (itemId: number, quantity = 1, extra: object = {}) => ({
   startDate: "2026-11-10",
   dueDate: "2026-11-12",
   purpose: "ใช้งานทดสอบ",

@@ -85,11 +85,11 @@ test("successful login clears failure history", async () => {
 });
 
 test("logAudit writes a row, also inside a transaction", async () => {
-  await logAudit(prisma, { actorId: "u1", action: "x", entity: "User", entityId: "e1", data: { a: 1 } });
-  await prisma.$transaction((tx) => logAudit(tx, { actorId: "u1", action: "y", entity: "User", entityId: "e2" }));
+  await logAudit(prisma, { actorId: 1, action: "x", entity: "User", entityId: 11, data: { a: 1 } });
+  await prisma.$transaction((tx) => logAudit(tx, { actorId: 1, action: "y", entity: "User", entityId: 12 }));
   const rows = await prisma.auditLog.findMany({ orderBy: { action: "asc" } });
   expect(rows).toHaveLength(2);
-  expect(rows[0]).toMatchObject({ action: "x", entityId: "e1", data: { a: 1 } });
+  expect(rows[0]).toMatchObject({ action: "x", entityId: 11, data: { a: 1 } });
 });
 
 test("parallel wrong-password attempts cannot bypass the rate limit", async () => {

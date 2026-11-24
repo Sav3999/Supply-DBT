@@ -1,3 +1,4 @@
+import { parseId } from "@/lib/id";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/db";
@@ -9,7 +10,8 @@ import { AddToCart } from "./add-to-cart";
 
 export default async function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await requirePageRole("BORROWER", "STAFF", "ADMIN");
-  const { id } = await params;
+  const id = parseId((await params).id);
+  if (id === null) notFound();
   const item = await getItem(id);
   if (!item || !item.active) notFound();
   const today = todayBangkok();

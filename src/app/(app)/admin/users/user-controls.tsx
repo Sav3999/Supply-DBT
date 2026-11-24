@@ -14,7 +14,7 @@ export function ActionButton({
   variant = "default",
 }: {
   action: Action;
-  userId: string;
+  userId: number;
   label: string;
   variant?: "default" | "outline" | "destructive";
 }) {
@@ -36,7 +36,7 @@ export function RoleSelect({
   role,
 }: {
   action: Action;
-  userId: string;
+  userId: number;
   role: keyof typeof ROLE_LABEL;
 }) {
   const [state, formAction, pending] = useActionState(action, null);

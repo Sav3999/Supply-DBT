@@ -33,7 +33,7 @@ export async function createCategory(actor: SessionUser, name: string): Promise<
   }
 }
 
-export async function renameCategory(actor: SessionUser, id: string, name: string): Promise<Category> {
+export async function renameCategory(actor: SessionUser, id: number, name: string): Promise<Category> {
   assertRole(actor, "ADMIN");
   const n = cleanName(name);
   try {
@@ -50,7 +50,7 @@ export async function renameCategory(actor: SessionUser, id: string, name: strin
   }
 }
 
-export async function deleteCategory(actor: SessionUser, id: string): Promise<void> {
+export async function deleteCategory(actor: SessionUser, id: number): Promise<void> {
   assertRole(actor, "ADMIN");
   const IN_USE = "ลบไม่ได้ เพราะยังมีของในหมวดนี้";
   try {

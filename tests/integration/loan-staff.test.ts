@@ -44,7 +44,7 @@ const loanOf = (
   });
 const pendingLoan = (item: Item, q: number) => loanOf(item, q);
 
-async function loanItemOf(loanId: string) {
+async function loanItemOf(loanId: number) {
   return prisma.loanItem.findFirstOrThrow({ where: { loanId } });
 }
 
@@ -381,7 +381,7 @@ test("listLoansForStaff filters by status, OVERDUE and borrower name", async () 
     dueDate: addDays(today, -1),
     items: [{ itemId: item.id, quantity: 1 }],
   });
-  const ids = (l: { id: string }[]) => l.map((x) => x.id).sort();
+  const ids = (l: { id: number }[]) => l.map((x) => x.id).sort();
 
   expect(ids(await listLoansForStaff({ status: "PENDING" }))).toEqual([pending.id]);
   expect(ids(await listLoansForStaff({ status: "APPROVED" }))).toEqual([approved.id]);
@@ -404,7 +404,7 @@ test("getLoanForStaff includes borrower, available assets and assigned assets", 
   expect(line.assets.map((a) => a.assetId)).toEqual(assets);
   expect(line.assets[0].asset.assetTag).toBe("M-1");
   expect(line.availableAssets.map((a) => a.assetTag)).toEqual(["M-2"]);
-  await expect(getLoanForStaff("nope")).rejects.toThrow("ไม่พบคำขอ");
+  await expect(getLoanForStaff(999999)).rejects.toThrow("ไม่พบคำขอ");
 });
 
 test("approve reports every short item in one error", async () => {

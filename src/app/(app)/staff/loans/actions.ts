@@ -4,6 +4,7 @@ import { ensureWired } from "@/server/wiring";
 import type { Condition } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { toResult, type Result } from "@/lib/result";
+import { requireId } from "@/lib/id";
 import { requireRole } from "@/server/auth/session";
 import { cancelLoan } from "@/server/loans/request";
 import { approveLoan, handOverLoan, receiveReturn, rejectLoan } from "@/server/loans/staff";
@@ -17,9 +18,9 @@ function refresh(loanId: string) {
   revalidatePath(`/my-loans/${loanId}`);
 }
 
-async function run(fd: FormData, fn: (loanId: string) => Promise<void>): Promise<ActionState> {
+async function run(fd: FormData, fn: (loanId: number) => Promise<void>): Promise<ActionState> {
   const loanId = String(fd.get("loanId") ?? "");
-  const result = await toResult(() => fn(loanId));
+  const result = await toResult(() => fn(requireId(loanId)));
   refresh(loanId);
   return result;
 }

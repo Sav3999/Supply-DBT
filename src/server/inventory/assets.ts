@@ -7,7 +7,7 @@ import { lockItems } from "@/server/loans/locks";
 
 const STATUSES: AssetStatus[] = ["AVAILABLE", "REPAIR", "LOST", "RETIRED"];
 
-export async function addAsset(actor: SessionUser, itemId: string, assetTag: string): Promise<Asset> {
+export async function addAsset(actor: SessionUser, itemId: number, assetTag: string): Promise<Asset> {
   assertRole(actor, "STAFF");
   const tag = assetTag.trim();
   if (!tag) throw new AppError("กรุณากรอกเลขครุภัณฑ์");
@@ -28,7 +28,7 @@ export async function addAsset(actor: SessionUser, itemId: string, assetTag: str
   }
 }
 
-export async function setAssetStatus(actor: SessionUser, assetId: string, status: AssetStatus): Promise<void> {
+export async function setAssetStatus(actor: SessionUser, assetId: number, status: AssetStatus): Promise<void> {
   assertRole(actor, "STAFF");
   if (!STATUSES.includes(status)) throw new AppError("สถานะไม่ถูกต้อง");
   await prisma.$transaction(async (tx) => {

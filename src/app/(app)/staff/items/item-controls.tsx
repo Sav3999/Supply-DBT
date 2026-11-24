@@ -31,11 +31,11 @@ export function ItemForm({
   item,
 }: {
   action: Action;
-  categories: { id: string; name: string }[];
+  categories: { id: number; name: string }[];
   item?: {
-    id: string;
+    id: number;
     name: string;
-    categoryId: string;
+    categoryId: number;
     description: string | null;
     kind: "SERIALIZED" | "QUANTITY";
     totalQuantity: number;
@@ -119,7 +119,7 @@ export function ItemForm({
   );
 }
 
-export function ImageForm({ action, id }: { action: Action; id: string }) {
+export function ImageForm({ action, id }: { action: Action; id: number }) {
   const [state, formAction, pending] = useActionState(action, null);
   const [preparing, startPreparing] = useTransition();
   const [localError, setLocalError] = useState<string | null>(null);
@@ -141,7 +141,7 @@ export function ImageForm({ action, id }: { action: Action; id: string }) {
         return;
       }
       const fd = new FormData();
-      fd.set("id", id);
+      fd.set("id", String(id));
       fd.set("image", small);
       // after an await the outer transition context is gone, so dispatch in a fresh one
       startTransition(() => formAction(fd));
@@ -163,7 +163,7 @@ export function ImageForm({ action, id }: { action: Action; id: string }) {
   );
 }
 
-export function ActiveForm({ action, id, active }: { action: Action; id: string; active: boolean }) {
+export function ActiveForm({ action, id, active }: { action: Action; id: number; active: boolean }) {
   const [state, formAction, pending] = useActionState(action, null);
   return (
     <form action={formAction} className="inline-flex flex-col gap-1">
@@ -177,7 +177,7 @@ export function ActiveForm({ action, id, active }: { action: Action; id: string;
   );
 }
 
-export function AddAssetForm({ action, id }: { action: Action; id: string }) {
+export function AddAssetForm({ action, id }: { action: Action; id: number }) {
   const [state, formAction, pending] = useActionState(action, null);
   return (
     <form action={formAction} className="space-y-1">
@@ -200,8 +200,8 @@ export function AssetStatusSelect({
   status,
 }: {
   action: Action;
-  itemId: string;
-  assetId: string;
+  itemId: number;
+  assetId: number;
   status: keyof typeof STATUS_LABEL;
 }) {
   const [state, formAction, pending] = useActionState(action, null);

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import type { Role } from "@prisma/client";
 import { toResult, type Result } from "@/lib/result";
+import { requireId } from "@/lib/id";
 import { requireRole, type SessionUser } from "@/server/auth/session";
 import {
   activateUser,
@@ -23,19 +24,19 @@ async function run(fn: (actor: SessionUser) => Promise<void>): Promise<ActionSta
 }
 
 export async function approveAction(_: ActionState, fd: FormData): Promise<ActionState> {
-  return run((a) => approveUser(a, String(fd.get("userId"))));
+  return run((a) => approveUser(a, requireId(fd.get("userId"))));
 }
 export async function rejectAction(_: ActionState, fd: FormData): Promise<ActionState> {
-  return run((a) => rejectUser(a, String(fd.get("userId"))));
+  return run((a) => rejectUser(a, requireId(fd.get("userId"))));
 }
 export async function suspendAction(_: ActionState, fd: FormData): Promise<ActionState> {
-  return run((a) => suspendUser(a, String(fd.get("userId"))));
+  return run((a) => suspendUser(a, requireId(fd.get("userId"))));
 }
 export async function activateAction(_: ActionState, fd: FormData): Promise<ActionState> {
-  return run((a) => activateUser(a, String(fd.get("userId"))));
+  return run((a) => activateUser(a, requireId(fd.get("userId"))));
 }
 export async function setRoleAction(_: ActionState, fd: FormData): Promise<ActionState> {
   const role = String(fd.get("role")) as Role;
   if (!ROLES.includes(role)) return { ok: false, error: "ข้อมูลไม่ถูกต้อง" };
-  return run((a) => setRole(a, String(fd.get("userId")), role));
+  return run((a) => setRole(a, requireId(fd.get("userId")), role));
 }

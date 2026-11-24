@@ -3,8 +3,9 @@ import { AppError } from "@/lib/result";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
+import { parseId } from "@/lib/id";
 
-export type SessionUser = { id: string; name: string; email: string; role: Role };
+export type SessionUser = { id: number; name: string; email: string; role: Role };
 
 /** Pure role check. ADMIN passes every STAFF check. */
 export function assertRole(user: SessionUser, ...roles: Role[]): void {
@@ -14,7 +15,7 @@ export function assertRole(user: SessionUser, ...roles: Role[]): void {
 
 export async function getCurrentUser(): Promise<SessionUser | null> {
   const session = await auth();
-  const id = session?.user?.id;
+  const id = parseId(session?.user?.id);
   if (!id) return null;
   const user = await prisma.user.findUnique({ where: { id } });
   if (!user || user.status !== "ACTIVE") return null;

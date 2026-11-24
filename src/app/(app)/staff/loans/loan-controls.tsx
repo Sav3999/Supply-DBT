@@ -37,7 +37,7 @@ export function ActionButton({
   variant = "default",
 }: {
   action: Action;
-  loanId: string;
+  loanId: number;
   label: string;
   confirmText?: string;
   variant?: "default" | "outline" | "destructive";
@@ -60,7 +60,7 @@ export function ActionButton({
   );
 }
 
-export function RejectForm({ action, loanId }: { action: Action; loanId: string }) {
+export function RejectForm({ action, loanId }: { action: Action; loanId: number }) {
   const [state, formAction, pending] = useActionState(action, null);
   return (
     <form action={formAction} className="flex flex-col gap-2 rounded-lg border p-3">
@@ -83,14 +83,14 @@ export function RejectForm({ action, loanId }: { action: Action; loanId: string 
 }
 
 export type HandOverLine = {
-  id: string;
+  id: number;
   name: string;
   quantity: number;
   serialized: boolean;
-  available: { id: string; assetTag: string }[];
+  available: { id: number; assetTag: string }[];
 };
 
-export function HandOverForm({ action, loanId, lines }: { action: Action; loanId: string; lines: HandOverLine[] }) {
+export function HandOverForm({ action, loanId, lines }: { action: Action; loanId: number; lines: HandOverLine[] }) {
   const [state, formAction, pending] = useActionState(action, null);
   const [picked, setPicked] = useState<Record<string, number>>({});
   const ready = lines.every((l) => !l.serialized || (picked[l.id] ?? 0) === l.quantity);
@@ -143,14 +143,14 @@ export function HandOverForm({ action, loanId, lines }: { action: Action; loanId
 }
 
 export type ReturnLine = {
-  id: string;
+  id: number;
   name: string;
   serialized: boolean;
   outstanding: number;
-  assets: { id: string; assetTag: string }[]; // unreturned assets of this line
+  assets: { id: number; assetTag: string }[]; // unreturned assets of this line
 };
 
-export function ReturnForm({ action, loanId, lines }: { action: Action; loanId: string; lines: ReturnLine[] }) {
+export function ReturnForm({ action, loanId, lines }: { action: Action; loanId: number; lines: ReturnLine[] }) {
   const [state, formAction, pending] = useActionState(action, null);
   return (
     <form action={formAction} className="flex flex-col gap-3 rounded-lg border p-3">

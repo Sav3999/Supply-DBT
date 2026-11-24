@@ -7,7 +7,7 @@ import { assertRole, type SessionUser } from "@/server/auth/session";
 const DONE = "รายการนี้ถูกดำเนินการไปแล้ว";
 const SELF = "ไม่สามารถแก้ไขบัญชีของตัวเองได้";
 
-function guardSelf(actor: SessionUser, userId: string) {
+function guardSelf(actor: SessionUser, userId: number) {
   if (actor.id === userId) throw new AppError(SELF);
 }
 
@@ -34,7 +34,7 @@ export async function listUsers(
 
 async function transition(
   actor: SessionUser,
-  userId: string,
+  userId: number,
   from: UserStatus,
   to: UserStatus,
   action: string,
@@ -49,12 +49,12 @@ async function transition(
   });
 }
 
-export async function approveUser(actor: SessionUser, userId: string): Promise<void> {
+export async function approveUser(actor: SessionUser, userId: number): Promise<void> {
   assertRole(actor, "ADMIN");
   await transition(actor, userId, "PENDING", "ACTIVE", "USER_APPROVE");
 }
 
-export async function rejectUser(actor: SessionUser, userId: string): Promise<void> {
+export async function rejectUser(actor: SessionUser, userId: number): Promise<void> {
   assertRole(actor, "ADMIN");
   await prisma.$transaction(async (tx) => {
     const { count } = await tx.user.deleteMany({ where: { id: userId, status: "PENDING" } });
@@ -63,19 +63,19 @@ export async function rejectUser(actor: SessionUser, userId: string): Promise<vo
   });
 }
 
-export async function suspendUser(actor: SessionUser, userId: string): Promise<void> {
+export async function suspendUser(actor: SessionUser, userId: number): Promise<void> {
   assertRole(actor, "ADMIN");
   guardSelf(actor, userId);
   await transition(actor, userId, "ACTIVE", "SUSPENDED", "USER_SUSPEND");
 }
 
-export async function activateUser(actor: SessionUser, userId: string): Promise<void> {
+export async function activateUser(actor: SessionUser, userId: number): Promise<void> {
   assertRole(actor, "ADMIN");
   guardSelf(actor, userId);
   await transition(actor, userId, "SUSPENDED", "ACTIVE", "USER_ACTIVATE");
 }
 
-export async function setRole(actor: SessionUser, userId: string, role: Role): Promise<void> {
+export async function setRole(actor: SessionUser, userId: number, role: Role): Promise<void> {
   assertRole(actor, "ADMIN");
   guardSelf(actor, userId);
   await prisma.$transaction(async (tx) => {

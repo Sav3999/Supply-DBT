@@ -26,7 +26,7 @@ export function AddCategoryForm({ action }: { action: Action }) {
   );
 }
 
-export function RenameForm({ action, id, name }: { action: Action; id: string; name: string }) {
+export function RenameForm({ action, id, name }: { action: Action; id: number; name: string }) {
   const [state, formAction, pending] = useActionState(action, null);
   return (
     <form action={formAction} className="space-y-1">
@@ -42,7 +42,7 @@ export function RenameForm({ action, id, name }: { action: Action; id: string; n
   );
 }
 
-export function DeleteForm({ action, id }: { action: Action; id: string }) {
+export function DeleteForm({ action, id }: { action: Action; id: number }) {
   const [state, formAction, pending] = useActionState(action, null);
   return (
     <form action={formAction} className="inline-flex flex-col gap-1">

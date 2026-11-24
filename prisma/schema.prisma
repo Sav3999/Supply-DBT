@@ -48,7 +48,7 @@ enum Condition {
 }
 
 model User {
-  id           String     @id @default(cuid())
+  id           Int        @id @default(autoincrement())
   name         String
   email        String     @unique
   passwordHash String
@@ -67,23 +67,23 @@ model User {
 
 model LineLinkCode {
   code      String   @id
-  userId    String
+  userId    Int
   expiresAt DateTime
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Category {
-  id   String @id @default(cuid())
+  id   Int    @id @default(autoincrement())
   name String @unique
 
   items Item[]
 }
 
 model Item {
-  id            String   @id @default(cuid())
+  id            Int      @id @default(autoincrement())
   name          String
-  categoryId    String
+  categoryId    Int
   description   String?
   imagePath     String?
   kind          ItemKind
@@ -97,8 +97,8 @@ model Item {
 }
 
 model Asset {
-  id       String      @id @default(cuid())
-  itemId   String
+  id       Int         @id @default(autoincrement())
+  itemId   Int
   assetTag String      @unique
   status   AssetStatus @default(AVAILABLE)
 
@@ -107,13 +107,13 @@ model Asset {
 }
 
 model Loan {
-  id           String     @id @default(cuid())
-  borrowerId   String
+  id           Int        @id @default(autoincrement())
+  borrowerId   Int
   startDate    DateTime   @db.Date
   dueDate      DateTime   @db.Date
   purpose      String
   status       LoanStatus @default(PENDING)
-  approverId   String?
+  approverId   Int?
   rejectReason String?
   approvedAt   DateTime?
   handedOverAt DateTime?
@@ -129,11 +129,11 @@ model Loan {
 }
 
 model LoanItem {
-  id               String @id @default(cuid())
-  loanId           String
-  itemId           String
+  id               Int @id @default(autoincrement())
+  loanId           Int
+  itemId           Int
   quantity         Int
-  returnedQuantity Int    @default(0)
+  returnedQuantity Int @default(0)
 
   loan   Loan        @relation(fields: [loanId], references: [id], onDelete: Cascade)
   item   Item        @relation(fields: [itemId], references: [id])
@@ -141,8 +141,8 @@ model LoanItem {
 }
 
 model LoanAsset {
-  loanItemId String
-  assetId    String
+  loanItemId Int
+  assetId    Int
   returnedAt DateTime?
   condition  Condition?
 
@@ -153,8 +153,8 @@ model LoanAsset {
 }
 
 model Notification {
-  id        String    @id @default(cuid())
-  userId    String
+  id        Int       @id @default(autoincrement())
+  userId    Int
   message   String
   link      String?
   readAt    DateTime?
@@ -175,11 +175,11 @@ model ReminderLog {
 }
 
 model AuditLog {
-  id        String   @id @default(cuid())
-  actorId   String
+  id        Int      @id @default(autoincrement())
+  actorId   Int
   action    String
   entity    String
-  entityId  String
+  entityId  Int
   data      Json?
   createdAt DateTime @default(now())
 }

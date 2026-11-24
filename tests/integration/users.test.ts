@@ -12,7 +12,7 @@ import { asSession, makeUser, resetDb } from "./helpers";
 
 beforeEach(resetDb);
 
-const audits = (action: string, entityId: string) =>
+const audits = (action: string, entityId: number) =>
   prisma.auditLog.count({ where: { action, entityId } });
 
 describe("users admin", () => {

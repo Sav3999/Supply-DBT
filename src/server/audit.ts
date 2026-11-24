@@ -3,7 +3,7 @@ import type { Db } from "@/lib/db";
 
 export async function logAudit(
   db: Db,
-  e: { actorId: string; action: string; entity: string; entityId: string; data?: unknown },
+  e: { actorId: number; action: string; entity: string; entityId: number; data?: unknown },
 ): Promise<void> {
   await db.auditLog.create({
     data: {

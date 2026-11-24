@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { toResult, type Result } from "@/lib/result";
+import { requireId } from "@/lib/id";
 import { requireRole, type SessionUser } from "@/server/auth/session";
 import { createCategory, deleteCategory, renameCategory } from "@/server/inventory/categories";
 
@@ -19,8 +20,8 @@ export async function createCategoryAction(_: ActionState, fd: FormData): Promis
   return run((a) => createCategory(a, String(fd.get("name") ?? "")));
 }
 export async function renameCategoryAction(_: ActionState, fd: FormData): Promise<ActionState> {
-  return run((a) => renameCategory(a, String(fd.get("id")), String(fd.get("name") ?? "")));
+  return run((a) => renameCategory(a, requireId(fd.get("id")), String(fd.get("name") ?? "")));
 }
 export async function deleteCategoryAction(_: ActionState, fd: FormData): Promise<ActionState> {
-  return run((a) => deleteCategory(a, String(fd.get("id"))));
+  return run((a) => deleteCategory(a, requireId(fd.get("id"))));
 }

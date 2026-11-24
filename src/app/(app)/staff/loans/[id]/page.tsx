@@ -1,3 +1,4 @@
+import { parseId } from "@/lib/id";
 import type { LoanStatus } from "@prisma/client";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -24,7 +25,8 @@ const dateTime = new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", da
 
 export default async function StaffLoanDetailPage({ params }: { params: Promise<{ id: string }> }) {
   await requirePageRole("STAFF");
-  const { id } = await params;
+  const id = parseId((await params).id);
+  if (id === null) notFound();
   let loan: StaffLoanDetail;
   try {
     loan = await getLoanForStaff(id);

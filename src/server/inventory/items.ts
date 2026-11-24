@@ -23,7 +23,7 @@ function formNumber(value: unknown): unknown {
 export const itemSchema = z
   .object({
     name: z.string().trim().min(1, "กรุณากรอกชื่อของ"),
-    categoryId: z.string().min(1, "กรุณาเลือกหมวดหมู่"),
+    categoryId: z.coerce.number({ error: "กรุณาเลือกหมวดหมู่" }).int("กรุณาเลือกหมวดหมู่").positive("กรุณาเลือกหมวดหมู่"),
     description: z.string().trim().optional(),
     kind: z.enum(["SERIALIZED", "QUANTITY"], { error: "ประเภทไม่ถูกต้อง" }),
     totalQuantity: z.preprocess(
@@ -55,7 +55,7 @@ const include = { category: true, assets: { orderBy: { assetTag: "asc" as const 
 
 export async function listItems(filter: {
   q?: string;
-  categoryId?: string;
+  categoryId?: number;
   includeInactive?: boolean;
 }): Promise<ItemWithRefs[]> {
   const q = filter.q?.trim();
@@ -67,7 +67,7 @@ export async function listItems(filter: {
   return prisma.item.findMany({ where, orderBy: { name: "asc" }, include });
 }
 
-export async function getItem(id: string): Promise<ItemWithRefs | null> {
+export async function getItem(id: number): Promise<ItemWithRefs | null> {
   return prisma.item.findUnique({ where: { id }, include });
 }
 
@@ -92,7 +92,7 @@ export async function createItem(actor: SessionUser, input: ItemInput): Promise<
   });
 }
 
-export async function updateItem(actor: SessionUser, id: string, input: ItemInput): Promise<Item> {
+export async function updateItem(actor: SessionUser, id: number, input: ItemInput): Promise<Item> {
   assertRole(actor, "STAFF");
   const v = itemSchema.parse(input);
   return prisma.$transaction(async (tx) => {
@@ -133,7 +133,7 @@ export async function updateItem(actor: SessionUser, id: string, input: ItemInpu
   });
 }
 
-export async function setItemImage(actor: SessionUser, itemId: string, file: File): Promise<Item> {
+export async function setItemImage(actor: SessionUser, itemId: number, file: File): Promise<Item> {
   assertRole(actor, "STAFF");
   if (!(await prisma.item.findUnique({ where: { id: itemId } }))) throw new AppError("ไม่พบของ");
   const imagePath = await saveUpload(file);
@@ -144,7 +144,7 @@ export async function setItemImage(actor: SessionUser, itemId: string, file: Fil
   });
 }
 
-export async function setItemActive(actor: SessionUser, itemId: string, active: boolean): Promise<Item> {
+export async function setItemActive(actor: SessionUser, itemId: number, active: boolean): Promise<Item> {
   assertRole(actor, "STAFF");
   return prisma.$transaction(async (tx) => {
     if (!(await tx.item.findUnique({ where: { id: itemId } }))) throw new AppError("ไม่พบของ");

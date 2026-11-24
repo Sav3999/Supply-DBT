@@ -24,7 +24,7 @@ describe("getCurrentUser", () => {
     expect(await getCurrentUser()).toBeNull();
   });
   test("returns null when user no longer exists", async () => {
-    await mockSession("00000000-0000-0000-0000-000000000000");
+    await mockSession(999999);
     expect(await getCurrentUser()).toBeNull();
   });
 });

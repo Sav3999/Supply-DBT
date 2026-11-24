@@ -1,6 +1,6 @@
 "use client";
 
-export type CartLine = { itemId: string; quantity: number };
+export type CartLine = { itemId: number; quantity: number };
 
 const KEY = "borrow-cart";
 
@@ -11,7 +11,7 @@ export function readCart(): CartLine[] {
     const data: unknown = JSON.parse(raw);
     if (!Array.isArray(data)) return [];
     return data.filter(
-      (l): l is CartLine => !!l && typeof l.itemId === "string" && Number.isInteger(l.quantity) && l.quantity >= 1,
+      (l): l is CartLine => !!l && Number.isSafeInteger(l.itemId) && l.itemId > 0 && Number.isInteger(l.quantity) && l.quantity >= 1,
     );
   } catch {
     return [];
@@ -26,7 +26,7 @@ export function writeCart(lines: CartLine[]): void {
   }
 }
 
-export function addToCart(itemId: string, quantity: number): void {
+export function addToCart(itemId: number, quantity: number): void {
   const lines = readCart();
   const existing = lines.find((l) => l.itemId === itemId);
   if (existing) existing.quantity += quantity;

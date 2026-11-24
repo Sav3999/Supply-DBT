@@ -10,7 +10,7 @@ export function isOverdue(loan: { status: LoanStatus; dueDate: Date }, today: Da
 /** เปลี่ยนสถานะแบบมีเงื่อนไข (กันกดซ้ำ/แข่งกัน): ต้องอยู่ในสถานะ `from` เท่านั้น */
 export async function transition(
   db: Db,
-  loanId: string,
+  loanId: number,
   from: LoanStatus[],
   data: Prisma.LoanUncheckedUpdateManyInput,
 ): Promise<void> {

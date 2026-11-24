@@ -1,3 +1,4 @@
+import { parseId } from "@/lib/id";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +11,8 @@ import { ActiveForm, AddAssetForm, AssetStatusSelect, ImageForm, ItemForm } from
 
 export default async function StaffItemPage({ params }: { params: Promise<{ id: string }> }) {
   await requirePageRole("STAFF");
-  const { id } = await params;
+  const id = parseId((await params).id);
+  if (id === null) notFound();
   const [item, categories] = await Promise.all([getItem(id), listCategories()]);
   if (!item) notFound();
 

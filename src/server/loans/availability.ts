@@ -2,7 +2,7 @@ import type { Db } from "@/lib/db";
 import { todayBangkok } from "@/lib/dates";
 
 /** จำนวนที่ถูกยืมค้างอยู่ (Loan สถานะ BORROWED): ผลรวมของ quantity - returnedQuantity */
-export async function outstandingQuantity(db: Db, itemId: string): Promise<number> {
+export async function outstandingQuantity(db: Db, itemId: number): Promise<number> {
   const rows = await db.loanItem.findMany({
     where: { itemId, loan: { status: "BORROWED" } },
     select: { quantity: true, returnedQuantity: true },
@@ -14,7 +14,7 @@ export async function outstandingQuantity(db: Db, itemId: string): Promise<numbe
  * จำนวนทั้งหมดที่ยืมได้ของของชิ้นนี้ (ของที่ inactive ทุกชนิด → 0)
  * SERIALIZED: นับ Asset สถานะ AVAILABLE/ON_LOAN; QUANTITY: totalQuantity
  */
-export async function capacity(db: Db, itemId: string): Promise<number> {
+export async function capacity(db: Db, itemId: number): Promise<number> {
   const item = await db.item.findUnique({
     where: { id: itemId },
     select: { kind: true, active: true, totalQuantity: true },
@@ -31,10 +31,10 @@ export async function capacity(db: Db, itemId: string): Promise<number> {
  */
 export async function reservedQuantity(
   db: Db,
-  itemId: string,
+  itemId: number,
   start: Date,
   due: Date,
-  excludeLoanId?: string,
+  excludeLoanId?: number,
   today: Date = todayBangkok(),
 ): Promise<number> {
   const rows = await db.loanItem.findMany({
@@ -56,10 +56,10 @@ export async function reservedQuantity(
 /** max(0, capacity - reserved) — ไม่ติดลบแม้ capacity ถูกลดหลังอนุมัติ */
 export async function availableQuantity(
   db: Db,
-  itemId: string,
+  itemId: number,
   start: Date,
   due: Date,
-  excludeLoanId?: string,
+  excludeLoanId?: number,
   today: Date = todayBangkok(),
 ): Promise<number> {
   const [cap, reserved] = await Promise.all([

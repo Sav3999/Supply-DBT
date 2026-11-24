@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { itemSchema } from "@/server/inventory/items";
 
-const base = { name: "เมาส์", categoryId: "c1", kind: "QUANTITY" as const, totalQuantity: "5", maxLoanDays: "7" };
+const base = { name: "เมาส์", categoryId: "1", kind: "QUANTITY" as const, totalQuantity: "5", maxLoanDays: "7" };
 
 function firstError(input: Record<string, unknown>): string | undefined {
   const r = itemSchema.safeParse(input);
@@ -35,4 +35,12 @@ describe("itemSchema numbers from form fields", () => {
   test("empty max loan days is an error", () => {
     expect(firstError({ ...base, maxLoanDays: "" })).toBe("กรุณากรอกจำนวนวันที่ยืมได้");
   });
+});
+
+test("missing or non-numeric category gives the Thai category message", () => {
+  for (const categoryId of ["", "abc", "0"]) {
+    const r = itemSchema.safeParse({ ...base, categoryId });
+    expect(r.success).toBe(false);
+    expect(r.error?.issues[0].message).toBe("กรุณาเลือกหมวดหมู่");
+  }
 });

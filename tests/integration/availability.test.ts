@@ -84,7 +84,7 @@ describe("capacity", () => {
     expect(await capacity(prisma, item.id)).toBe(0);
   });
   test("missing item is 0", async () => {
-    expect(await capacity(prisma, "nope")).toBe(0);
+    expect(await capacity(prisma, 999999)).toBe(0);
   });
 });
 

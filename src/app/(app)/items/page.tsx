@@ -1,3 +1,4 @@
+import { parseId } from "@/lib/id";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ export default async function ItemsPage({
   await requirePageRole("BORROWER", "STAFF", "ADMIN");
   const { q, categoryId } = await searchParams;
   const [items, categories] = await Promise.all([
-    listItems({ q, categoryId: categoryId || undefined }),
+    listItems({ q, categoryId: parseId(categoryId) ?? undefined }),
     listCategories(),
   ]);
   const today = todayBangkok();

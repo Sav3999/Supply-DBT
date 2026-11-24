@@ -20,7 +20,7 @@ const MAX_RETRIES = 3;
 type Tx = Prisma.TransactionClient;
 
 /** อ่าน Loan + LoanItem แล้วล็อกแถว Item ที่เกี่ยวข้อง (LoanItem ของ Loan ไม่เปลี่ยน จึงอ่านก่อนล็อกได้) */
-async function lockLoan(tx: Tx, loanId: string) {
+async function lockLoan(tx: Tx, loanId: number) {
   const ids = await tx.loanItem.findMany({ where: { loanId }, select: { itemId: true } });
   await lockItems(tx, ids.map((i) => i.itemId));
   const loan = await tx.loan.findUnique({
@@ -40,7 +40,7 @@ function isSerializationFailure(e: unknown): boolean {
 
 // ---------- approve ----------
 
-export async function approveLoan(actor: SessionUser, loanId: string): Promise<void> {
+export async function approveLoan(actor: SessionUser, loanId: number): Promise<void> {
   assertRole(actor, "STAFF");
   let approved: Loan | undefined;
   for (let attempt = 0; ; attempt++) {
@@ -76,7 +76,7 @@ export async function approveLoan(actor: SessionUser, loanId: string): Promise<v
 
 // ---------- reject ----------
 
-export async function rejectLoan(actor: SessionUser, loanId: string, reason: string): Promise<void> {
+export async function rejectLoan(actor: SessionUser, loanId: number, reason: string): Promise<void> {
   assertRole(actor, "STAFF");
   const r = (reason ?? "").trim();
   if (!r) throw new AppError("กรุณาระบุเหตุผล");
@@ -99,26 +99,26 @@ export async function rejectLoan(actor: SessionUser, loanId: string, reason: str
 // ---------- handover ----------
 
 const handOverSchema = z.object({
-  assets: z.record(z.string(), z.array(z.string().min(1))),
+  assets: z.record(z.string(), z.array(z.coerce.number({ error: "ข้อมูลไม่ถูกต้อง" }).int("ข้อมูลไม่ถูกต้อง").positive("ข้อมูลไม่ถูกต้อง"))),
 });
 export type HandOverInput = z.input<typeof handOverSchema>;
 
-export async function handOverLoan(actor: SessionUser, loanId: string, input: HandOverInput): Promise<void> {
+export async function handOverLoan(actor: SessionUser, loanId: number, input: HandOverInput): Promise<void> {
   assertRole(actor, "STAFF");
   const v = handOverSchema.parse(input);
   const handed = await prisma.$transaction(async (tx) => {
     const loan = await lockLoan(tx, loanId);
     if (loan.status !== "APPROVED") throw new AppError(ALREADY);
 
-    const lineIds = new Set(loan.items.map((i) => i.id));
+    const lineIds = new Set(loan.items.map((i) => String(i.id)));
     for (const key of Object.keys(v.assets)) {
       if (!lineIds.has(key) && v.assets[key].length > 0) throw new AppError("ไม่พบรายการในคำขอ");
     }
 
-    const plan: { loanItemId: string; assetIds: string[] }[] = [];
-    const seen = new Set<string>();
+    const plan: { loanItemId: number; assetIds: number[] }[] = [];
+    const seen = new Set<number>();
     for (const li of loan.items) {
-      const picked = [...new Set(v.assets[li.id] ?? [])];
+      const picked = [...new Set(v.assets[String(li.id)] ?? [])];
       if (li.item.kind === "QUANTITY") {
         if (picked.length > 0) throw new AppError("ของนี้ไม่มีเลขครุภัณฑ์");
         continue;
@@ -162,10 +162,10 @@ export async function handOverLoan(actor: SessionUser, loanId: string, input: Ha
 
 const condition = z.enum(["GOOD", "DAMAGED", "LOST"], { message: "สภาพไม่ถูกต้อง" });
 const returnSchema = z.object({
-  serialized: z.array(z.object({ loanItemId: z.string().min(1), assetId: z.string().min(1), condition })),
+  serialized: z.array(z.object({ loanItemId: z.coerce.number({ error: "ข้อมูลไม่ถูกต้อง" }).int("ข้อมูลไม่ถูกต้อง").positive("ข้อมูลไม่ถูกต้อง"), assetId: z.coerce.number({ error: "ข้อมูลไม่ถูกต้อง" }).int("ข้อมูลไม่ถูกต้อง").positive("ข้อมูลไม่ถูกต้อง"), condition })),
   quantity: z.array(
     z.object({
-      loanItemId: z.string().min(1),
+      loanItemId: z.coerce.number({ error: "ข้อมูลไม่ถูกต้อง" }).int("ข้อมูลไม่ถูกต้อง").positive("ข้อมูลไม่ถูกต้อง"),
       quantity: z.number().int("จำนวนต้องเป็นจำนวนเต็ม").min(1, "จำนวนต้องไม่น้อยกว่า 1"),
       condition,
     }),
@@ -179,7 +179,7 @@ const ASSET_STATUS_AFTER: Record<Condition, "AVAILABLE" | "REPAIR" | "LOST"> = {
   LOST: "LOST",
 };
 
-export async function receiveReturn(actor: SessionUser, loanId: string, input: ReturnInput): Promise<void> {
+export async function receiveReturn(actor: SessionUser, loanId: number, input: ReturnInput): Promise<void> {
   assertRole(actor, "STAFF");
   const v = returnSchema.parse(input);
   if (v.serialized.length === 0 && v.quantity.length === 0) throw new AppError("กรุณาเลือกรายการที่คืน");
@@ -190,7 +190,7 @@ export async function receiveReturn(actor: SessionUser, loanId: string, input: R
     if (loan.status !== "BORROWED") throw new AppError(ALREADY);
     const lines = new Map(loan.items.map((i) => [i.id, i]));
     const now = new Date();
-    const added = new Map<string, number>();
+    const added = new Map<number, number>();
 
     for (const s of v.serialized) {
       const li = lines.get(s.loanItemId);
@@ -267,7 +267,7 @@ export async function listLoansForStaff(filter: StaffLoanFilter = {}): Promise<S
 
 export type StaffLoanDetail = Loan & {
   borrower: BorrowerInfo;
-  approver: { id: string; name: string } | null;
+  approver: { id: number; name: string } | null;
   items: (LoanItem & {
     item: Item;
     assets: (LoanAsset & { asset: Asset })[];
@@ -276,7 +276,7 @@ export type StaffLoanDetail = Loan & {
   })[];
 };
 
-export async function getLoanForStaff(loanId: string): Promise<StaffLoanDetail> {
+export async function getLoanForStaff(loanId: number): Promise<StaffLoanDetail> {
   const loan = await prisma.loan.findUnique({
     where: { id: loanId },
     include: {

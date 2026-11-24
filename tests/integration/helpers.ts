@@ -52,11 +52,11 @@ export async function makeItem(o: {
 }
 
 export async function makeLoan(o: {
-  borrowerId: string;
+  borrowerId: number;
   status: LoanStatus;
   startDate: Date;
   dueDate: Date;
-  items: { itemId: string; quantity: number; returnedQuantity?: number }[];
+  items: { itemId: number; quantity: number; returnedQuantity?: number }[];
 }): Promise<Loan> {
   return prisma.loan.create({
     data: {
@@ -83,10 +83,10 @@ export async function makeLoan(o: {
  * `await mockSession(userId)` to make `auth()` resolve to a session for that user,
  * or `await mockSession(null)` for no session.
  */
-export async function mockSession(userId: string | null): Promise<void> {
+export async function mockSession(userId: number | null): Promise<void> {
   const { auth } = await import("@/auth"); // lazy: keeps next-auth out of tests that never mock a session
   vi.mocked(auth).mockResolvedValue(
-    (userId ? { user: { id: userId }, expires: "2999-01-01T00:00:00.000Z" } : null) as never,
+    (userId ? { user: { id: String(userId) }, expires: "2999-01-01T00:00:00.000Z" } : null) as never,
   );
 }
 
