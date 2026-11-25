@@ -16,7 +16,7 @@ const STAFF: NavItem[] = [
 const ADMIN: NavItem[] = [
   { label: "ผู้ใช้", href: "/admin/users" },
   { label: "หมวดหมู่", href: "/admin/categories" },
-  { label: "Audit Log", href: "/admin/audit" },
+  { label: "บันทึกการใช้งาน", href: "/admin/audit" },
 ];
 
 const HELP: NavItem = { label: "วิธีใช้", href: "/help" };
