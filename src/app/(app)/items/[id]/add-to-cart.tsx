@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { addToCart } from "@/components/cart-store";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { QuantityInput } from "@/components/quantity-input";
 
 export function AddToCart({ itemId }: { itemId: number }) {
   const [qty, setQty] = useState(1);
@@ -12,16 +12,13 @@ export function AddToCart({ itemId }: { itemId: number }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <Input
-          type="number"
-          min={1}
+        <QuantityInput
           value={qty}
-          aria-label="จำนวน"
-          onChange={(e) => {
-            setQty(Math.max(1, Math.floor(Number(e.target.value)) || 1));
+          label="จำนวน"
+          onChange={(n) => {
+            setQty(n);
             setAdded(false);
           }}
-          className="w-24"
         />
         <Button
           type="button"
@@ -34,9 +31,9 @@ export function AddToCart({ itemId }: { itemId: number }) {
         </Button>
       </div>
       {added && (
-        <p className="text-sm text-muted-foreground">
-          เพิ่มลงตะกร้าแล้ว{" "}
-          <Link href="/cart" className="underline">
+        <p className="text-sm text-status-returned">
+          เพิ่มลงตะกร้าแล้ว {qty} ชิ้น{" "}
+          <Link href="/cart" className="text-primary underline underline-offset-4">
             ไปที่ตะกร้า
           </Link>
         </p>

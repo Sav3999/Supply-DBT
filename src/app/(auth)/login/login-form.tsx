@@ -1,15 +1,15 @@
 "use client";
 
-import { useActionState } from "react";
 import { loginAction } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useFormAction } from "@/lib/use-form-action";
 
 export function LoginForm() {
-  const [state, action, pending] = useActionState(loginAction, undefined);
+  const { state, pending, form } = useFormAction(loginAction, undefined);
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <form {...form} className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
         <Label htmlFor="email">อีเมล</Label>
         <Input id="email" name="email" type="email" autoComplete="email" required />

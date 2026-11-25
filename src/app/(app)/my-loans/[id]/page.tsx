@@ -46,13 +46,13 @@ export default async function MyLoanDetailPage({
     <div className="space-y-4">
       {sent && isOwner && (
         <div role="status" className="rounded-lg border border-green-600/30 bg-green-600/10 p-3 text-sm">
-          <p className="font-medium">ส่งคำขอเรียบร้อยแล้ว ✓</p>
+          <p className="font-medium">ส่งคำขอเรียบร้อยแล้ว</p>
           <p>
             รอเจ้าหน้าที่อนุมัติ ดูคำขอทั้งหมดได้ที่เมนู{" "}
             <Link href="/my-loans" className="text-primary underline-offset-4 hover:underline">
               คำขอของฉัน
             </Link>{" "}
-            เมื่อมีความคืบหน้าคุณจะได้แจ้งเตือนที่กระดิ่ง 🔔 และ LINE (ถ้าผูกไว้ที่หน้าโปรไฟล์)
+            เมื่อมีความคืบหน้าคุณจะได้แจ้งเตือนที่รูปกระดิ่งมุมขวาบน และ LINE (ถ้าผูกไว้ที่หน้าโปรไฟล์)
           </p>
         </div>
       )}

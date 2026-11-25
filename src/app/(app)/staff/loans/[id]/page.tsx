@@ -1,5 +1,6 @@
 import { parseId } from "@/lib/id";
 import type { LoanStatus } from "@prisma/client";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { LoanStatusBadge } from "@/components/loan-status-badge";
@@ -38,7 +39,8 @@ export default async function StaffLoanDetailPage({ params }: { params: Promise<
 
   return (
     <div className="space-y-4">
-      <Link href="/staff/loans" className="text-sm underline">
+      <Link href="/staff/loans" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+        <ChevronLeft aria-hidden className="size-4" />
         กลับไปรายการคำขอ
       </Link>
       <div className="flex items-center justify-between gap-2">

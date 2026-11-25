@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { clearCart, readCart, writeCart, type CartLine } from "@/components/cart-store";
 import { Button } from "@/components/ui/button";
+import { QuantityInput } from "@/components/quantity-input";
+import { diffDaysInclusive, formatThaiDateLong, parseDateOnly } from "@/lib/dates";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cartItemsAction, createLoanAction, type CartItemInfo } from "../my-loans/actions";
@@ -87,22 +89,20 @@ export function CartForm({ today, tomorrow }: { today: string; tomorrow: string 
               {info[l.itemId]?.name}
               {info[l.itemId] && !info[l.itemId].active && <span className="ml-1 text-destructive">(ปิดใช้งาน)</span>}
             </span>
-            <Input
-              type="number"
-              min={1}
+            <QuantityInput
               value={l.quantity}
-              aria-label={`จำนวน ${info[l.itemId]?.name ?? ""}`}
-              onChange={(e) =>
-                update(
-                  lines.map((x) =>
-                    x.itemId === l.itemId ? { ...x, quantity: Math.max(1, Math.floor(Number(e.target.value)) || 1) } : x,
-                  ),
-                )
-              }
-              className="w-20"
+              label={`จำนวน ${info[l.itemId]?.name ?? ""}`}
+              onChange={(n) => update(lines.map((x) => (x.itemId === l.itemId ? { ...x, quantity: n } : x)))}
             />
-            <Button type="button" variant="outline" size="sm" onClick={() => update(lines.filter((x) => x.itemId !== l.itemId))}>
-              ลบ
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-destructive hover:text-destructive"
+              aria-label={`เอา ${info[l.itemId]?.name ?? ""} ออกจากตะกร้า`}
+              onClick={() => update(lines.filter((x) => x.itemId !== l.itemId))}
+            >
+              เอาออก
             </Button>
           </li>
         ))}
@@ -112,12 +112,19 @@ export function CartForm({ today, tomorrow }: { today: string; tomorrow: string 
         <div className="space-y-1">
           <Label htmlFor="startDate">วันยืม</Label>
           <Input id="startDate" type="date" required min={today} value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+          <ThaiDate value={startDate} />
         </div>
         <div className="space-y-1">
           <Label htmlFor="dueDate">วันคืน</Label>
           <Input id="dueDate" type="date" required min={startDate} value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          <ThaiDate value={dueDate} />
         </div>
       </div>
+      {/^\d{4}-\d{2}-\d{2}$/.test(startDate) && /^\d{4}-\d{2}-\d{2}$/.test(dueDate) && dueDate >= startDate && (
+        <p className="text-sm text-muted-foreground">
+          รวม <span className="font-medium text-foreground tabular-nums">{diffDaysInclusive(parseDateOnly(startDate), parseDateOnly(dueDate))}</span> วัน
+        </p>
+      )}
       <div className="space-y-1">
         <Label htmlFor="purpose">เหตุผลการยืม</Label>
         <textarea
@@ -136,4 +143,10 @@ export function CartForm({ today, tomorrow }: { today: string; tomorrow: string 
       </Button>
     </form>
   );
+}
+
+/** The browser shows date inputs in its own locale (often 11/25/2026); spell the date out in Thai. */
+function ThaiDate({ value }: { value: string }) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+  return <p className="text-xs text-muted-foreground">{formatThaiDateLong(parseDateOnly(value))}</p>;
 }

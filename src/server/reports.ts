@@ -80,7 +80,7 @@ export async function searchHistory(filter: HistoryFilter, take = 200): Promise<
     department: l.borrower.department,
     items: l.items
       .map((li) => {
-        if (li.item.kind === "QUANTITY") return `${li.item.name} x${li.quantity}`;
+        if (li.item.kind === "QUANTITY") return `${li.item.name} ${li.quantity} ชิ้น`;
         const tags = li.assets.map((a) => a.asset.assetTag);
         return tags.length ? `${li.item.name} (${tags.join(", ")})` : li.item.name;
       })

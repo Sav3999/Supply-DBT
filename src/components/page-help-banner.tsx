@@ -11,12 +11,9 @@ export function PageHelpBanner() {
   return (
     <div
       role="note"
-      className="mb-4 flex items-start gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-foreground"
+      className="mb-4 rounded-r-lg border-l-4 border-primary bg-brand-surface px-3 py-2 text-sm text-foreground"
     >
-      <span aria-hidden className="mt-0.5 text-primary">
-        ℹ
-      </span>
-      <p className="flex-1">
+      <p>
         {help.text}{" "}
         <Link href="/help" className="whitespace-nowrap text-primary underline-offset-4 hover:underline">
           ดูวิธีใช้ทั้งหมด

@@ -31,7 +31,7 @@ export default async function AdminCategoriesPage() {
                   </TableCell>
                   <TableCell>{c._count.items}</TableCell>
                   <TableCell>
-                    <DeleteForm action={deleteCategoryAction} id={c.id} />
+                    <DeleteForm action={deleteCategoryAction} id={c.id} name={c.name} itemCount={c._count.items} />
                   </TableCell>
                 </TableRow>
               ))}

@@ -66,15 +66,19 @@ export default async function StaffLoansPage({
             <li key={l.id}>
               <Link href={`/staff/loans/${l.id}`} className="block space-y-1 rounded-lg border p-3 hover:bg-muted">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium">{l.borrower.name}</span>
+                  <span>
+                    <span className="font-medium">{l.borrower.name}</span>
+                    {l.borrower.department.trim() && l.borrower.department.trim() !== "-" && (
+                      <span className="text-sm text-muted-foreground"> · {l.borrower.department}</span>
+                    )}
+                  </span>
                   <LoanStatusBadge status={l.status} overdue={isOverdue(l, today)} />
                 </div>
                 <p className="text-sm">
-                  {formatThaiDate(l.startDate)} ถึง {formatThaiDate(l.dueDate)}
-                  <span className="text-muted-foreground"> · {l.borrower.department}</span>
+                  {formatThaiDate(l.startDate)} – {formatThaiDate(l.dueDate)}
                 </p>
                 <p className="truncate text-sm text-muted-foreground">
-                  {l.items.map((i) => `${i.item.name} x${i.quantity}`).join(", ")}
+                  {l.items.map((i) => `${i.item.name} (${i.quantity} ชิ้น)`).join(", ")}
                 </p>
               </Link>
             </li>
