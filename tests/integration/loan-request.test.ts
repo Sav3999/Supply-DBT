@@ -153,3 +153,17 @@ test("reports every short item in one error", async () => {
   expect((err as Error).message).toContain("เสียม");
   expect(await prisma.loan.count()).toBe(0);
 });
+
+test("day-limit error names the item that limits it", async () => {
+  const { u, item } = await setup();
+  await prisma.item.update({ where: { id: item.id }, data: { maxLoanDays: 2, name: "เมาส์" } });
+  await expect(createLoan(asSession(u), input(item.id), NOW)).rejects.toThrow("ยืมได้ไม่เกิน 2 วัน (เมาส์)");
+});
+
+test("short-stock error says how many are free", async () => {
+  const { u, item } = await setup(2);
+  await prisma.item.update({ where: { id: item.id }, data: { name: "จอบ" } });
+  await expect(createLoan(asSession(u), input(item.id, 3), NOW)).rejects.toThrow(
+    "ของไม่พอในช่วงวันที่เลือก: จอบ (ว่าง 2 ชิ้น)",
+  );
+});

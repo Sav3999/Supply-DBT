@@ -8,7 +8,7 @@ import { QuantityInput } from "@/components/quantity-input";
 
 export function AddToCart({ itemId }: { itemId: number }) {
   const [qty, setQty] = useState(1);
-  const [added, setAdded] = useState(false);
+  const [inCart, setInCart] = useState<number | null>(null);
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
@@ -17,22 +17,21 @@ export function AddToCart({ itemId }: { itemId: number }) {
           label="จำนวน"
           onChange={(n) => {
             setQty(n);
-            setAdded(false);
+            setInCart(null);
           }}
         />
         <Button
           type="button"
           onClick={() => {
-            addToCart(itemId, qty);
-            setAdded(true);
+            setInCart(addToCart(itemId, qty));
           }}
         >
           เพิ่มลงตะกร้า
         </Button>
       </div>
-      {added && (
+      {inCart !== null && (
         <p className="text-sm text-status-returned">
-          เพิ่มลงตะกร้าแล้ว {qty} ชิ้น{" "}
+          เพิ่มลงตะกร้าแล้ว — ตอนนี้ในตะกร้ามีของนี้รวม {inCart} ชิ้น{" "}
           <Link href="/cart" className="text-primary underline underline-offset-4">
             ไปที่ตะกร้า
           </Link>

@@ -85,7 +85,7 @@ export function CartForm({ today, tomorrow }: { today: string; tomorrow: string 
       <ul className="divide-y rounded-lg border">
         {lines.map((l) => (
           <li key={l.itemId} className="flex items-center justify-between gap-2 p-3">
-            <span className="min-w-0 flex-1 truncate text-sm">
+            <span className="line-clamp-2 min-w-0 flex-1 text-sm">
               {info[l.itemId]?.name}
               {info[l.itemId] && !info[l.itemId].active && <span className="ml-1 text-destructive">(ปิดใช้งาน)</span>}
             </span>
