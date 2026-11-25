@@ -19,7 +19,7 @@ export default async function AdminAuditPage({ searchParams }: { searchParams: P
 
   return (
     <div className="space-y-4">
-      <h1 className="text-xl font-semibold">บันทึกการใช้งาน (Audit Log)</h1>
+      <h1 className="text-xl font-semibold">บันทึกการใช้งาน</h1>
       <form className="flex gap-2">
         <Input name="action" defaultValue={action ?? ""} placeholder="กรองตาม action เช่น LOAN_APPROVE" />
         <Button type="submit" size="lg">
