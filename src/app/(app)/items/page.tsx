@@ -1,4 +1,5 @@
 import { parseId } from "@/lib/id";
+import { ItemImage } from "@/components/item-image";
 import { CartLink } from "@/components/cart-link";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -56,14 +57,7 @@ export default async function ItemsPage({
           {items.map((i, idx) => (
             <Link key={i.id} href={`/items/${i.id}`}>
               <Card className="h-full hover:bg-muted">
-                {i.imagePath ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={`/uploads/${i.imagePath}`} alt={i.name} className="h-36 w-full rounded-lg object-cover" />
-                ) : (
-                  <div className="flex h-36 w-full items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground">
-                    ไม่มีรูป
-                  </div>
-                )}
+                <ItemImage src={i.imagePath} alt={i.name} />
                 <div className="space-y-1">
                   <p className="font-medium">{i.name}</p>
                   <p className="text-sm text-muted-foreground">{i.category.name}</p>

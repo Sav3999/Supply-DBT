@@ -159,11 +159,11 @@ function NewItemImage() {
       <div className="flex items-center gap-3">
         <label
           htmlFor="new-item-image"
-          className="grid size-24 shrink-0 cursor-pointer place-items-center overflow-hidden rounded-lg border border-dashed bg-brand-surface text-xs text-muted-foreground hover:border-primary/50"
+          className="relative grid aspect-[4/3] w-28 shrink-0 cursor-pointer place-items-center overflow-hidden rounded-lg border border-dashed bg-brand-surface text-xs text-muted-foreground hover:border-primary/50"
         >
           {preview ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={preview} alt="รูปที่เลือก" className="size-full object-cover" />
+            <img src={preview} alt="รูปที่เลือก" className="absolute inset-0 size-full object-contain" />
           ) : (
             "ยังไม่มีรูป"
           )}
