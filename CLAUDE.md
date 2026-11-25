@@ -1,4 +1,4 @@
-# ระบบคลังวัสดุ DBT
+# ระบบคลังวัสดุ แผนกเทคโนโลยีธุรกิจดิจิทัล
 
 Thai-language borrow/return web app for the DBT department. Next.js 15 (App Router) + TypeScript, Prisma 6 + PostgreSQL, Auth.js v5 beta, LINE Messaging API, Vitest + Playwright.
 

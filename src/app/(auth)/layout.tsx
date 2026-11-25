@@ -7,9 +7,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="flex flex-col items-center gap-3 text-center">
           <BrandLogo size={88} showName={false} />
           <h1 className="text-2xl font-bold">
-            ระบบคลังวัสดุ <span className="text-primary">DBT</span>
+            ระบบคลังวัสดุ
+            <span className="mt-1 block text-lg text-primary">แผนกเทคโนโลยีธุรกิจดิจิทัล</span>
           </h1>
-          <p className="text-sm text-muted-foreground">ระบบยืม-คืนวัสดุและอุปกรณ์ สาขาเทคโนโลยีธุรกิจดิจิทัล</p>
+          <p className="text-sm text-muted-foreground">ระบบยืม-คืนวัสดุและอุปกรณ์</p>
         </div>
         {children}
       </main>
