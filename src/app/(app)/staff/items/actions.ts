@@ -7,7 +7,7 @@ import { AppError, toResult, type Result } from "@/lib/result";
 import { requireId } from "@/lib/id";
 import { requireRole } from "@/server/auth/session";
 import { addAsset, deleteAsset, setAssetStatus } from "@/server/inventory/assets";
-import { createItem, deleteItem, setItemActive, setItemImage, updateItem, type ItemInput } from "@/server/inventory/items";
+import { clearItemImage, createItem, deleteItem, setItemActive, setItemImage, updateItem, type ItemInput } from "@/server/inventory/items";
 
 export type ActionState = Result<void> | null;
 
@@ -49,6 +49,7 @@ export async function uploadImageAction(_: ActionState, fd: FormData): Promise<A
     await setItemImage(actor, requireId(id), file);
   });
   revalidatePath(`/staff/items/${id}`);
+  revalidatePath("/items");
   return result;
 }
 
@@ -97,5 +98,15 @@ export async function deleteAssetAction(_: ActionState, fd: FormData): Promise<A
     await deleteAsset(await requireRole("STAFF"), requireId(fd.get("assetId")));
   });
   revalidatePath(`/staff/items/${String(fd.get("id"))}`);
+  return result;
+}
+
+export async function removeImageAction(_: ActionState, fd: FormData): Promise<ActionState> {
+  const id = String(fd.get("id"));
+  const result = await toResult(async () => {
+    await clearItemImage(await requireRole("STAFF"), requireId(id));
+  });
+  revalidatePath(`/staff/items/${id}`);
+  revalidatePath("/items");
   return result;
 }

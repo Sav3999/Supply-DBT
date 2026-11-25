@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { getEnv } from "@/lib/env";
 import { AppError } from "@/lib/result";
@@ -17,4 +17,10 @@ export async function saveUpload(file: File): Promise<string> {
   const name = `${randomUUID()}.${ext}`;
   await writeFile(path.join(dir, name), Buffer.from(await file.arrayBuffer()));
   return name;
+}
+
+/** Remove a stored picture. Best effort: a missing file is fine, and a failure must not undo the DB change. */
+export async function removeUpload(name: string | null | undefined): Promise<void> {
+  if (!name || !/^[0-9a-f-]{36}\.(jpg|png|webp)$/.test(name)) return;
+  await unlink(path.join(getEnv().UPLOAD_DIR, name)).catch(() => undefined);
 }

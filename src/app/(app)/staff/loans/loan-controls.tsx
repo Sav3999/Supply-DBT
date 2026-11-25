@@ -112,9 +112,10 @@ export function HandOverForm({ action, loanId, lines }: { action: Action; loanId
           <legend className="text-sm">
             {l.name} — {l.quantity} ชิ้น
             {l.serialized && (
-              <span className="text-muted-foreground">
+              <span className={(picked[l.id] ?? 0) > l.quantity ? "text-destructive" : "text-muted-foreground"}>
                 {" "}
-                (เลือกแล้ว {picked[l.id] ?? 0}/{l.quantity})
+                (เลือกแล้ว {picked[l.id] ?? 0}/{l.quantity}
+                {(picked[l.id] ?? 0) > l.quantity && ` — เลือกเกิน ${(picked[l.id] ?? 0) - l.quantity} ชิ้น`})
               </span>
             )}
           </legend>

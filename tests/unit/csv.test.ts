@@ -61,3 +61,18 @@ test("csv neutralises spreadsheet formulas in text cells only", () => {
   expect(csv).toContain(`3,"'=HYPERLINK(""x"")",'-5,'@cmd,2026-11-09,2026-11-12,`);
   expect(historyToCsv([{ ...row, borrowerName: "\tx", department: "+1", items: "ok" }])).toContain(`3,'\tx,'+1,ok,`);
 });
+
+test("a lone '-' (empty class) stays plain; formulas are still neutralised", () => {
+  const row = (department: string) => ({
+    loanId: 3,
+    borrowerName: "=HYPERLINK(1)",
+    department,
+    items: "y",
+    startDate: d("2026-11-09"),
+    dueDate: d("2026-11-12"),
+    status: "RETURNED" as const,
+    returnedAt: null,
+  });
+  expect(historyToCsv([row("-")])).toContain("3,'=HYPERLINK(1),-,y,");
+  expect(historyToCsv([row("-1+2")])).toContain(",'-1+2,");
+});

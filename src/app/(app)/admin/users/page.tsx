@@ -89,11 +89,23 @@ export default async function AdminUsersPage({
                       {u.status === "PENDING" && (
                         <>
                           <ActionButton action={approveAction} userId={u.id} label="ยืนยัน" />
-                          <ActionButton action={rejectAction} userId={u.id} label="ปฏิเสธ" variant="destructive" />
+                          <ActionButton
+                            action={rejectAction}
+                            userId={u.id}
+                            label="ปฏิเสธ"
+                            variant="destructive"
+                            confirmText={`ปฏิเสธผู้สมัคร “${u.name}” ใช่ไหม? บัญชีนี้จะถูกลบ และต้องสมัครใหม่`}
+                          />
                         </>
                       )}
                       {u.status === "ACTIVE" && u.id !== actor.id && (
-                        <ActionButton action={suspendAction} userId={u.id} label="ระงับ" variant="outline" />
+                        <ActionButton
+                          action={suspendAction}
+                          userId={u.id}
+                          label="ระงับ"
+                          variant="outline"
+                          confirmText={`ระงับบัญชี “${u.name}” ใช่ไหม? ผู้ใช้จะเข้าสู่ระบบไม่ได้จนกว่าจะเปิดใช้อีกครั้ง`}
+                        />
                       )}
                       {u.status === "SUSPENDED" && (
                         <ActionButton action={activateAction} userId={u.id} label="เปิดใช้" variant="outline" />
