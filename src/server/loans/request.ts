@@ -1,7 +1,7 @@
 import type { Loan, LoanItem, Item } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { formatDateOnly, parseDateOnly, todayBangkok } from "@/lib/dates";
+import { diffDaysInclusive, formatDateOnly, parseDateOnly, todayBangkok } from "@/lib/dates";
 import { AppError } from "@/lib/result";
 import { logAudit } from "@/server/audit";
 import type { SessionUser } from "@/server/auth/session";
@@ -51,13 +51,17 @@ export async function createLoan(actor: SessionUser, input: unknown, now: Date =
       if (!item.active) throw new AppError(`ของนี้ปิดใช้งานแล้ว: ${item.name}`);
     }
     const err = validateLoanDates(start, due, items.map((i) => i.maxLoanDays), todayBangkok(now));
-    if (err) throw new AppError(err);
+    if (err) {
+      // with several items the borrower can't tell which one has the short limit
+      const days = diffDaysInclusive(start, due);
+      const limited = items.filter((i) => i.maxLoanDays < days).map((i) => i.name);
+      throw new AppError(err.startsWith("ยืมได้ไม่เกิน") && limited.length ? `${err} (${limited.join(", ")})` : err);
+    }
     const short: string[] = [];
     for (const line of v.items) {
       const item = byId.get(line.itemId)!;
-      if ((await availableQuantity(tx, item.id, start, due, undefined, todayBangkok(now))) < line.quantity) {
-        short.push(item.name);
-      }
+      const free = await availableQuantity(tx, item.id, start, due, undefined, todayBangkok(now));
+      if (free < line.quantity) short.push(`${item.name} (ว่าง ${free} ชิ้น)`);
     }
     if (short.length > 0) throw new AppError(`ของไม่พอในช่วงวันที่เลือก: ${short.join(", ")}`);
     const created = await tx.loan.create({

@@ -3,6 +3,8 @@
 export type CartLine = { itemId: number; quantity: number };
 
 const KEY = "borrow-cart";
+/** Fired on window whenever this tab changes the cart (other tabs get the "storage" event). */
+export const CART_EVENT = "borrow-cart-change";
 
 export function readCart(): CartLine[] {
   try {
@@ -24,14 +26,17 @@ export function writeCart(lines: CartLine[]): void {
   } catch {
     // storage unavailable: ignore
   }
+  window.dispatchEvent(new Event(CART_EVENT));
 }
 
-export function addToCart(itemId: number, quantity: number): void {
+/** Adds to what is already in the cart; returns the new total for this item. */
+export function addToCart(itemId: number, quantity: number): number {
   const lines = readCart();
   const existing = lines.find((l) => l.itemId === itemId);
   if (existing) existing.quantity += quantity;
   else lines.push({ itemId, quantity });
   writeCart(lines);
+  return existing ? existing.quantity : quantity;
 }
 
 export function clearCart(): void {
@@ -40,4 +45,5 @@ export function clearCart(): void {
   } catch {
     // ignore
   }
+  window.dispatchEvent(new Event(CART_EVENT));
 }

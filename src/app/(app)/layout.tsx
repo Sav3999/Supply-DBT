@@ -30,7 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </Link>
             <div className="flex items-center gap-2">
               <NotificationBell />
-              <span className="truncate text-sm text-muted-foreground">{user.name}</span>
+              <span className="hidden max-w-48 truncate text-sm text-muted-foreground sm:inline">{user.name}</span>
               <form
                 action={async () => {
                   "use server";

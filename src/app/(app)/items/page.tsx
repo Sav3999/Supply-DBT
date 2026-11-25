@@ -1,4 +1,5 @@
 import { parseId } from "@/lib/id";
+import { CartLink } from "@/components/cart-link";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,9 +30,7 @@ export default async function ItemsPage({
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
         <h1 className="text-xl font-semibold">รายการของ</h1>
-        <Link href="/cart" className="rounded-lg border px-3 py-1.5 text-sm hover:bg-muted">
-          ตะกร้า
-        </Link>
+        <CartLink />
       </div>
       <form className="flex flex-wrap gap-2">
         <Input name="q" defaultValue={q ?? ""} placeholder="ค้นหาชื่อของ" className="flex-1" />
