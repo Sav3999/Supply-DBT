@@ -47,7 +47,7 @@ test("searchHistory filters by borrower and date range, builds items string", as
   const byName = await searchHistory({ borrowerQ: "สมชาย" });
   expect(byName).toHaveLength(1);
   expect(byName[0].department).toBe("ฝ่ายA");
-  expect(byName[0].items).toBe(`${nb.name} (NB-1, NB-2), ${hoe.name} x3`);
+  expect(byName[0].items).toBe(`${nb.name} (NB-1, NB-2), ${hoe.name} 3 ชิ้น`);
 
   expect(await searchHistory({ from: addDays(today, 4) })).toHaveLength(1);
   expect(await searchHistory({ to: addDays(today, 0) })).toHaveLength(1);

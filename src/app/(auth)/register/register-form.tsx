@@ -1,15 +1,15 @@
 "use client";
 
-import { useActionState } from "react";
 import Link from "next/link";
 import { registerAction } from "../actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useFormAction } from "@/lib/use-form-action";
 
 export function RegisterForm() {
-  const [state, action, pending] = useActionState(registerAction, undefined);
+  const { state, pending, form } = useFormAction(registerAction, undefined);
 
   if (state?.ok) {
     return (
@@ -32,7 +32,7 @@ export function RegisterForm() {
         <CardTitle>สมัครใช้งาน</CardTitle>
       </CardHeader>
       <CardContent>
-        <form action={action} className="flex flex-col gap-4">
+        <form {...form} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="name">ชื่อ-นามสกุล</Label>
             <Input id="name" name="name" autoComplete="name" required />

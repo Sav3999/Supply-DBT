@@ -32,7 +32,7 @@ export default async function MyLoansPage() {
                   <LoanStatusBadge status={l.status} overdue={isOverdue(l, today)} />
                 </div>
                 <p className="truncate text-sm text-muted-foreground">
-                  {l.items.map((i) => `${i.item.name} x${i.quantity}`).join(", ")}
+                  {l.items.map((i) => `${i.item.name} (${i.quantity} ชิ้น)`).join(", ")}
                 </p>
               </Link>
             </li>

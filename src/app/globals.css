@@ -187,4 +187,9 @@
   h3 {
     font-family: var(--font-heading);
   }
+  /* Numbers line up in tables, counters and dates. */
+  td,
+  th {
+    font-variant-numeric: tabular-nums;
+  }
 }

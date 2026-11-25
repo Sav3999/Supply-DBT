@@ -6,8 +6,8 @@ import type { AssetStatus } from "@prisma/client";
 import { AppError, toResult, type Result } from "@/lib/result";
 import { requireId } from "@/lib/id";
 import { requireRole } from "@/server/auth/session";
-import { addAsset, setAssetStatus } from "@/server/inventory/assets";
-import { createItem, setItemActive, setItemImage, updateItem, type ItemInput } from "@/server/inventory/items";
+import { addAsset, deleteAsset, setAssetStatus } from "@/server/inventory/assets";
+import { createItem, deleteItem, setItemActive, setItemImage, updateItem, type ItemInput } from "@/server/inventory/items";
 
 export type ActionState = Result<void> | null;
 
@@ -78,6 +78,23 @@ export async function assetStatusAction(_: ActionState, fd: FormData): Promise<A
       requireId(fd.get("assetId")),
       String(fd.get("status")) as AssetStatus,
     );
+  });
+  revalidatePath(`/staff/items/${String(fd.get("id"))}`);
+  return result;
+}
+
+export async function deleteItemAction(_: ActionState, fd: FormData): Promise<ActionState> {
+  const result = await toResult(async () => {
+    await deleteItem(await requireRole("STAFF"), requireId(fd.get("id")));
+  });
+  if (!result.ok) return result;
+  revalidatePath("/staff/items");
+  redirect("/staff/items");
+}
+
+export async function deleteAssetAction(_: ActionState, fd: FormData): Promise<ActionState> {
+  const result = await toResult(async () => {
+    await deleteAsset(await requireRole("STAFF"), requireId(fd.get("assetId")));
   });
   revalidatePath(`/staff/items/${String(fd.get("id"))}`);
   return result;

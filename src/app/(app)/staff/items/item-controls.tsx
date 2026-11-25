@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { shrinkImage } from "@/lib/image-fit";
+import { useFormAction } from "@/lib/use-form-action";
 import type { ActionState } from "./actions";
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -42,9 +43,10 @@ export function ItemForm({
     maxLoanDays: number;
   };
 }) {
-  const [state, formAction, pending] = useActionState(action, null);
+  const { state, pending, form } = useFormAction(action, null);
+  const [kind, setKind] = useState(item?.kind ?? "QUANTITY");
   return (
-    <form action={formAction} className="space-y-3">
+    <form {...form} className="space-y-3">
       {item && <input type="hidden" name="id" value={item.id} />}
       <div className="space-y-1">
         <Label htmlFor="name">ชื่อของ</Label>
@@ -81,15 +83,15 @@ export function ItemForm({
             <p className="text-sm">{item.kind === "SERIALIZED" ? "มีเลขครุภัณฑ์" : "นับเป็นจำนวน"}</p>
           </>
         ) : (
-          <select id="kind" name="kind" defaultValue="QUANTITY" className={selectClass}>
+          <select id="kind" name="kind" value={kind} onChange={(e) => setKind(e.target.value as typeof kind)} className={selectClass}>
             <option value="QUANTITY">นับเป็นจำนวน</option>
             <option value="SERIALIZED">มีเลขครุภัณฑ์</option>
           </select>
         )}
       </div>
-      {(!item || item.kind === "QUANTITY") && (
+      {kind === "QUANTITY" && (
         <div className="space-y-1">
-          <Label htmlFor="totalQuantity">จำนวนรวม (เฉพาะของนับเป็นจำนวน)</Label>
+          <Label htmlFor="totalQuantity">จำนวนรวม</Label>
           <Input
             id="totalQuantity"
             name="totalQuantity"
@@ -110,10 +112,14 @@ export function ItemForm({
         <Input id="maxLoanDays" name="maxLoanDays" inputMode="numeric" autoComplete="off" required defaultValue={item?.maxLoanDays ?? 7} />
       </div>
       <Err state={state} />
-      {state?.ok && <p className="text-xs text-muted-foreground">บันทึกแล้ว</p>}
-      {!item && <p className="text-xs text-muted-foreground">เพิ่มรูปและเลขครุภัณฑ์ได้ในหน้าถัดไปหลังกดเพิ่มของ</p>}
+      {state?.ok && <p className="text-xs text-status-returned">บันทึกแล้ว</p>}
+      {!item && (
+        <p className="text-xs text-muted-foreground">
+          {kind === "SERIALIZED" ? "เพิ่มรูปและเลขครุภัณฑ์ได้ในหน้าถัดไปหลังกดเพิ่มของ" : "เพิ่มรูปได้ในหน้าถัดไปหลังกดเพิ่มของ"}
+        </p>
+      )}
       <Button type="submit" disabled={pending}>
-        {item ? "บันทึก" : "เพิ่มของ"}
+        {pending ? "กำลังบันทึก..." : item ? "บันทึก" : "เพิ่มของ"}
       </Button>
     </form>
   );
@@ -164,9 +170,9 @@ export function ImageForm({ action, id }: { action: Action; id: number }) {
 }
 
 export function ActiveForm({ action, id, active }: { action: Action; id: number; active: boolean }) {
-  const [state, formAction, pending] = useActionState(action, null);
+  const { state, pending, form } = useFormAction(action, null);
   return (
-    <form action={formAction} className="inline-flex flex-col gap-1">
+    <form {...form} className="inline-flex flex-col gap-1">
       <input type="hidden" name="id" value={id} />
       <input type="hidden" name="active" value={String(!active)} />
       <Button type="submit" size="sm" variant="outline" disabled={pending}>
@@ -178,9 +184,9 @@ export function ActiveForm({ action, id, active }: { action: Action; id: number;
 }
 
 export function AddAssetForm({ action, id }: { action: Action; id: number }) {
-  const [state, formAction, pending] = useActionState(action, null);
+  const { state, pending, form } = useFormAction(action, null, { resetOnSuccess: true });
   return (
-    <form action={formAction} className="space-y-1">
+    <form {...form} className="space-y-1">
       <input type="hidden" name="id" value={id} />
       <div className="flex gap-2">
         <Input name="assetTag" required placeholder="เลขครุภัณฑ์" aria-label="เลขครุภัณฑ์" />
@@ -224,6 +230,37 @@ export function AssetStatusSelect({
           </option>
         ))}
       </select>
+      <Err state={state} />
+    </form>
+  );
+}
+
+export function DeleteItemForm({ action, id, name }: { action: Action; id: number; name: string }) {
+  const { state, pending, form } = useFormAction(action, null, {
+    confirm: `ลบ “${name}” ออกจากระบบใช่ไหม? ลบแล้วกู้คืนไม่ได้`,
+  });
+  return (
+    <form {...form} className="space-y-2">
+      <input type="hidden" name="id" value={id} />
+      <Button type="submit" variant="destructive" disabled={pending}>
+        {pending ? "กำลังลบ..." : "ลบของนี้"}
+      </Button>
+      <Err state={state} />
+    </form>
+  );
+}
+
+export function DeleteAssetForm({ action, itemId, assetId, assetTag }: { action: Action; itemId: number; assetId: number; assetTag: string }) {
+  const { state, pending, form } = useFormAction(action, null, {
+    confirm: `ลบเลขครุภัณฑ์ ${assetTag} ใช่ไหม?`,
+  });
+  return (
+    <form {...form} className="inline-flex flex-col items-end gap-1">
+      <input type="hidden" name="id" value={itemId} />
+      <input type="hidden" name="assetId" value={assetId} />
+      <Button type="submit" size="sm" variant="ghost" disabled={pending} className="text-destructive hover:text-destructive" aria-label={`ลบ ${assetTag}`}>
+        ลบ
+      </Button>
       <Err state={state} />
     </form>
   );

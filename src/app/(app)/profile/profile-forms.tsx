@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useFormAction } from "@/lib/use-form-action";
 import {
   changePasswordAction,
   createLinkCodeAction,
@@ -24,9 +25,9 @@ function Msg({ state, ok }: { state: ActionState; ok: string }) {
 }
 
 export function ProfileForm({ user }: { user: { name: string; department: string; phone: string } }) {
-  const [state, action, pending] = useActionState(updateProfileAction, null);
+  const { state, pending, form } = useFormAction(updateProfileAction, null);
   return (
-    <form action={action} className="flex flex-col gap-3">
+    <form {...form} className="flex flex-col gap-3">
       <div className="flex flex-col gap-2">
         <Label htmlFor="name">ชื่อ-นามสกุล</Label>
         <Input id="name" name="name" defaultValue={user.name} required />
@@ -48,9 +49,9 @@ export function ProfileForm({ user }: { user: { name: string; department: string
 }
 
 export function PasswordForm() {
-  const [state, action, pending] = useActionState(changePasswordAction, null);
+  const { state, pending, form } = useFormAction(changePasswordAction, null, { resetOnSuccess: true });
   return (
-    <form key={state?.ok ? "done" : "form"} action={action} className="flex flex-col gap-3">
+    <form {...form} className="flex flex-col gap-3">
       <div className="flex flex-col gap-2">
         <Label htmlFor="current">รหัสผ่านปัจจุบัน</Label>
         <Input id="current" name="current" type="password" autoComplete="current-password" required />

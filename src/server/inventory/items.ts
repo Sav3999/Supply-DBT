@@ -153,3 +153,31 @@ export async function setItemActive(actor: SessionUser, itemId: number, active: 
     return item;
   });
 }
+
+/**
+ * Hard-delete an item that was never borrowed (its assets go with it). Items with
+ * loan history must stay for the records — staff turn those off instead.
+ */
+export async function deleteItem(actor: SessionUser, itemId: number): Promise<void> {
+  assertRole(actor, "STAFF");
+  await prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT id FROM "Item" WHERE id = ${itemId} FOR UPDATE`;
+    const item = await tx.item.findUnique({ where: { id: itemId } });
+    if (!item) throw new AppError("ไม่พบของ");
+    if ((await tx.loanItem.count({ where: { itemId } })) > 0) {
+      throw new AppError("ลบไม่ได้ เพราะของนี้มีประวัติการยืม ให้กด “ปิดการใช้งาน” แทน");
+    }
+    await tx.asset.deleteMany({ where: { itemId } });
+    await tx.item.delete({ where: { id: itemId } });
+    await logAudit(tx, { actorId: actor.id, action: "ITEM_DELETE", entity: "Item", entityId: itemId, data: { name: item.name } });
+  });
+}
+
+/** What blocks deleting an item: how many loans used it, and which asset ids were ever lent. */
+export async function itemDeleteInfo(itemId: number): Promise<{ loanCount: number; lentAssetIds: Set<number> }> {
+  const [loanCount, lent] = await Promise.all([
+    prisma.loanItem.count({ where: { itemId } }),
+    prisma.loanAsset.findMany({ where: { asset: { itemId } }, select: { assetId: true }, distinct: ["assetId"] }),
+  ]);
+  return { loanCount, lentAssetIds: new Set(lent.map((l) => l.assetId)) };
+}

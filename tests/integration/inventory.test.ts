@@ -5,8 +5,8 @@ import { beforeEach, describe, expect, test } from "vitest";
 import { prisma } from "@/lib/db";
 import { parseDateOnly as d } from "@/lib/dates";
 import { createCategory, deleteCategory, renameCategory } from "@/server/inventory/categories";
-import { createItem, getItem, listItems, setItemActive, setItemImage, updateItem } from "@/server/inventory/items";
-import { addAsset, setAssetStatus } from "@/server/inventory/assets";
+import { createItem, deleteItem, getItem, listItems, setItemActive, setItemImage, updateItem } from "@/server/inventory/items";
+import { addAsset, deleteAsset, setAssetStatus } from "@/server/inventory/assets";
 import { outstandingQuantity } from "@/server/loans/availability";
 import { asSession, makeItem, makeLoan, makeUser, resetDb } from "./helpers";
 
@@ -124,6 +124,50 @@ describe("assets", () => {
     await setAssetStatus(asSession(staff), item.assets[0].id, "REPAIR");
     expect((await prisma.asset.findUniqueOrThrow({ where: { id: item.assets[0].id } })).status).toBe("REPAIR");
     expect(await audits("ASSET_STATUS")).toBe(1);
+  });
+});
+
+describe("delete", () => {
+  test("deletes a never-borrowed item together with its assets, with audit", async () => {
+    const staff = await makeUser({ role: "STAFF" });
+    const item = await makeItem({ kind: "SERIALIZED", assets: ["D-1", "D-2"] });
+    await deleteItem(asSession(staff), item.id);
+    expect(await prisma.item.count({ where: { id: item.id } })).toBe(0);
+    expect(await prisma.asset.count({ where: { itemId: item.id } })).toBe(0);
+    expect(await audits("ITEM_DELETE")).toBe(1);
+  });
+
+  test("refuses to delete an item that has loan history", async () => {
+    const staff = await makeUser({ role: "STAFF" });
+    const borrower = await makeUser({});
+    const item = await makeItem({ kind: "QUANTITY", totalQuantity: 3 });
+    await makeLoan({ borrowerId: borrower.id, status: "RETURNED", startDate: d("2026-01-01"), dueDate: d("2026-01-02"), items: [{ itemId: item.id, quantity: 1, returnedQuantity: 1 }] });
+    await expect(deleteItem(asSession(staff), item.id)).rejects.toThrow("ลบไม่ได้ เพราะของนี้มีประวัติการยืม");
+    expect(await prisma.item.count({ where: { id: item.id } })).toBe(1);
+  });
+
+  test("borrower cannot delete items", async () => {
+    const borrower = await makeUser({});
+    const item = await makeItem({ kind: "QUANTITY", totalQuantity: 1 });
+    await expect(deleteItem(asSession(borrower), item.id)).rejects.toThrow();
+  });
+
+  test("deletes a never-borrowed asset, with audit", async () => {
+    const staff = await makeUser({ role: "STAFF" });
+    const item = await makeItem({ kind: "SERIALIZED", assets: ["E-1"] });
+    await deleteAsset(asSession(staff), item.assets[0].id);
+    expect(await prisma.asset.count({ where: { itemId: item.id } })).toBe(0);
+    expect(await audits("ASSET_DELETE")).toBe(1);
+  });
+
+  test("refuses to delete an asset that has loan history", async () => {
+    const staff = await makeUser({ role: "STAFF" });
+    const borrower = await makeUser({});
+    const item = await makeItem({ kind: "SERIALIZED", assets: ["F-1"] });
+    const loan = await makeLoan({ borrowerId: borrower.id, status: "RETURNED", startDate: d("2026-01-01"), dueDate: d("2026-01-02"), items: [{ itemId: item.id, quantity: 1, returnedQuantity: 1 }] });
+    const line = await prisma.loanItem.findFirstOrThrow({ where: { loanId: loan.id } });
+    await prisma.loanAsset.create({ data: { loanItemId: line.id, assetId: item.assets[0].id, returnedAt: new Date() } });
+    await expect(deleteAsset(asSession(staff), item.assets[0].id)).rejects.toThrow("ลบไม่ได้ เพราะเลขครุภัณฑ์นี้มีประวัติการยืม");
   });
 });
 

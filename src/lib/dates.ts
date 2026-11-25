@@ -44,3 +44,10 @@ const thaiFmt = new Intl.DateTimeFormat("th-TH", { dateStyle: "medium", timeZone
 export function formatThaiDate(d: Date): string {
   return thaiFmt.format(d);
 }
+
+const thaiLongFmt = new Intl.DateTimeFormat("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: TZ });
+
+/** วันที่แบบไทยเต็ม เช่น วันพุธที่ 25 พฤศจิกายน 2569 */
+export function formatThaiDateLong(d: Date): string {
+  return thaiLongFmt.format(d);
+}

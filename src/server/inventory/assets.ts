@@ -45,3 +45,18 @@ export async function setAssetStatus(actor: SessionUser, assetId: number, status
     await logAudit(tx, { actorId: actor.id, action: "ASSET_STATUS", entity: "Asset", entityId: assetId, data: { from: asset.status, to: status } });
   });
 }
+
+/** Delete an asset tag that was never lent out (e.g. typed by mistake). */
+export async function deleteAsset(actor: SessionUser, assetId: number): Promise<void> {
+  assertRole(actor, "STAFF");
+  await prisma.$transaction(async (tx) => {
+    const asset = await tx.asset.findUnique({ where: { id: assetId } });
+    if (!asset) throw new AppError("ไม่พบเลขครุภัณฑ์");
+    await lockItems(tx, [asset.itemId]);
+    if ((await tx.loanAsset.count({ where: { assetId } })) > 0) {
+      throw new AppError("ลบไม่ได้ เพราะเลขครุภัณฑ์นี้มีประวัติการยืม ให้เปลี่ยนสถานะเป็น “เลิกใช้” แทน");
+    }
+    await tx.asset.delete({ where: { id: assetId } });
+    await logAudit(tx, { actorId: actor.id, action: "ASSET_DELETE", entity: "Asset", entityId: assetId, data: { itemId: asset.itemId, assetTag: asset.assetTag } });
+  });
+}

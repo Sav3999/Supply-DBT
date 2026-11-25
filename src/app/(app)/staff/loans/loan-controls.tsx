@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { CONDITION_LABEL } from "@/lib/labels";
@@ -61,9 +62,9 @@ export function ActionButton({
 }
 
 export function RejectForm({ action, loanId }: { action: Action; loanId: number }) {
-  const [state, formAction, pending] = useActionState(action, null);
+  const { state, pending, form } = useFormAction(action, null);
   return (
-    <form action={formAction} className="flex flex-col gap-2 rounded-lg border p-3">
+    <form {...form} className="flex flex-col gap-2 rounded-lg border p-3">
       <input type="hidden" name="loanId" value={loanId} />
       <Label htmlFor="reject-reason">เหตุผลที่ปฏิเสธ</Label>
       <textarea
@@ -91,13 +92,12 @@ export type HandOverLine = {
 };
 
 export function HandOverForm({ action, loanId, lines }: { action: Action; loanId: number; lines: HandOverLine[] }) {
-  const [state, formAction, pending] = useActionState(action, null);
+  const { state, pending, form } = useFormAction(action, null);
   const [picked, setPicked] = useState<Record<string, number>>({});
   const ready = lines.every((l) => !l.serialized || (picked[l.id] ?? 0) === l.quantity);
   return (
     <form
-      action={formAction}
-      // count from the form itself so the counter stays right after React resets the form post-submit
+      {...form}
       onChange={(e) => {
         const fd = new FormData(e.currentTarget);
         setPicked(Object.fromEntries(lines.map((l) => [l.id, fd.getAll(`asset:${l.id}`).length])));
@@ -151,9 +151,9 @@ export type ReturnLine = {
 };
 
 export function ReturnForm({ action, loanId, lines }: { action: Action; loanId: number; lines: ReturnLine[] }) {
-  const [state, formAction, pending] = useActionState(action, null);
+  const { state, pending, form } = useFormAction(action, null, { resetOnSuccess: true });
   return (
-    <form action={formAction} className="flex flex-col gap-3 rounded-lg border p-3">
+    <form {...form} className="flex flex-col gap-3 rounded-lg border p-3">
       <input type="hidden" name="loanId" value={loanId} />
       <h2 className="font-medium">รับคืน</h2>
       <p className="text-sm text-muted-foreground">คืนบางส่วนได้ เลือกเฉพาะชิ้นที่ได้รับคืนวันนี้</p>
