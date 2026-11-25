@@ -7,11 +7,17 @@ import { AppError } from "@/lib/result";
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 
-/** บันทึกรูปลง UPLOAD_DIR ด้วยชื่อสุ่ม คืนชื่อไฟล์ `<uuid>.<ext>` */
-export async function saveUpload(file: File): Promise<string> {
+/** ตรวจชนิด/ขนาดไฟล์รูป (โยน AppError ภาษาไทย) คืนนามสกุลไฟล์ */
+export function assertUpload(file: File): string {
   const ext = EXT[file.type];
   if (!ext) throw new AppError("รองรับเฉพาะไฟล์ jpg, png, webp");
   if (file.size > MAX_UPLOAD_BYTES) throw new AppError("ไฟล์ต้องไม่เกิน 5MB");
+  return ext;
+}
+
+/** บันทึกรูปลง UPLOAD_DIR ด้วยชื่อสุ่ม คืนชื่อไฟล์ `<uuid>.<ext>` */
+export async function saveUpload(file: File): Promise<string> {
+  const ext = assertUpload(file);
   const dir = getEnv().UPLOAD_DIR;
   await mkdir(dir, { recursive: true });
   const name = `${randomUUID()}.${ext}`;

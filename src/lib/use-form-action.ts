@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useEffect, useRef, type FormEvent } from "react";
+import { startTransition, useActionState, useEffect, useRef, useTransition, type FormEvent } from "react";
 
 /**
  * useActionState for forms, without React 19's automatic form reset.
@@ -18,10 +18,16 @@ import { startTransition, useActionState, useEffect, useRef, type FormEvent } fr
 export function useFormAction<S>(
   action: (prev: Awaited<S>, fd: FormData) => Promise<S>,
   initial: Awaited<S>,
-  opts: { resetOnSuccess?: boolean; confirm?: string } = {},
+  opts: {
+    resetOnSuccess?: boolean;
+    confirm?: string;
+    /** async tweak of the data before sending, e.g. shrinking a photo */
+    prepare?: (fd: FormData) => Promise<FormData>;
+  } = {},
 ) {
   const [state, dispatch, pending] = useActionState(action, initial);
   const ref = useRef<HTMLFormElement>(null);
+  const [preparing, startPreparing] = useTransition();
 
   useEffect(() => {
     if (opts.resetOnSuccess && (state as { ok?: unknown } | null | undefined)?.ok === true) ref.current?.reset();
@@ -31,8 +37,17 @@ export function useFormAction<S>(
     e.preventDefault();
     if (opts.confirm && !window.confirm(opts.confirm)) return;
     const fd = new FormData(e.currentTarget);
-    startTransition(() => dispatch(fd));
+    const prepare = opts.prepare;
+    if (!prepare) {
+      startTransition(() => dispatch(fd));
+      return;
+    }
+    startPreparing(async () => {
+      const ready = await prepare(fd);
+      // after an await the outer transition is gone, so dispatch in a fresh one
+      startTransition(() => dispatch(ready));
+    });
   }
 
-  return { state, pending, form: { ref, onSubmit, action: dispatch } };
+  return { state, pending: pending || preparing, form: { ref, onSubmit, action: dispatch } };
 }
