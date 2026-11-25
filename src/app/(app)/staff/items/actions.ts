@@ -24,9 +24,12 @@ function itemInput(fd: FormData): ItemInput {
 }
 
 export async function createItemAction(_: ActionState, fd: FormData): Promise<ActionState> {
-  const result = await toResult(async () => createItem(await requireRole("STAFF"), itemInput(fd)));
+  const file = fd.get("image");
+  const image = file instanceof File && file.size > 0 ? file : null;
+  const result = await toResult(async () => createItem(await requireRole("STAFF"), itemInput(fd), image));
   if (!result.ok) return result;
   revalidatePath("/staff/items");
+  revalidatePath("/items");
   redirect(`/staff/items/${result.data.id}`);
 }
 

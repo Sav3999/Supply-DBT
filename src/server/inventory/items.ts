@@ -5,7 +5,7 @@ import { AppError } from "@/lib/result";
 import { logAudit } from "@/server/audit";
 import { assertRole, type SessionUser } from "@/server/auth/session";
 import { outstandingQuantity } from "@/server/loans/availability";
-import { removeUpload, saveUpload } from "./upload";
+import { assertUpload, removeUpload, saveUpload } from "./upload";
 
 const THAI_DIGITS = "๐๑๒๓๔๕๖๗๘๙";
 
@@ -71,25 +71,40 @@ export async function getItem(id: number): Promise<ItemWithRefs | null> {
   return prisma.item.findUnique({ where: { id }, include });
 }
 
-export async function createItem(actor: SessionUser, input: ItemInput): Promise<Item> {
+/** Create an item; an optional picture is checked first and saved with it. */
+export async function createItem(actor: SessionUser, input: ItemInput, image?: File | null): Promise<Item> {
   assertRole(actor, "STAFF");
   const v = itemSchema.parse(input);
   const totalQuantity = v.kind === "SERIALIZED" ? 0 : v.totalQuantity;
-  return prisma.$transaction(async (tx) => {
-    if (!(await tx.category.findUnique({ where: { id: v.categoryId } }))) throw new AppError("ไม่พบหมวดหมู่");
-    const item = await tx.item.create({
-      data: {
-        name: v.name,
-        categoryId: v.categoryId,
-        description: v.description || null,
-        kind: v.kind,
-        totalQuantity,
-        maxLoanDays: v.maxLoanDays,
-      },
+  if (image) assertUpload(image); // refuse a bad file before creating anything
+  const imagePath = image ? await saveUpload(image) : null;
+  try {
+    return await prisma.$transaction(async (tx) => {
+      if (!(await tx.category.findUnique({ where: { id: v.categoryId } }))) throw new AppError("ไม่พบหมวดหมู่");
+      const item = await tx.item.create({
+        data: {
+          name: v.name,
+          categoryId: v.categoryId,
+          description: v.description || null,
+          kind: v.kind,
+          totalQuantity,
+          maxLoanDays: v.maxLoanDays,
+          imagePath,
+        },
+      });
+      await logAudit(tx, {
+        actorId: actor.id,
+        action: "ITEM_CREATE",
+        entity: "Item",
+        entityId: item.id,
+        data: { name: v.name, ...(imagePath ? { imagePath } : {}) },
+      });
+      return item;
     });
-    await logAudit(tx, { actorId: actor.id, action: "ITEM_CREATE", entity: "Item", entityId: item.id, data: { name: v.name } });
-    return item;
-  });
+  } catch (e) {
+    await removeUpload(imagePath); // nothing points at the file
+    throw e;
+  }
 }
 
 export async function updateItem(actor: SessionUser, id: number, input: ItemInput): Promise<Item> {

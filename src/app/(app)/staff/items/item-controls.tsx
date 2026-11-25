@@ -1,6 +1,6 @@
 "use client";
 
-import { startTransition, useActionState, useState, useTransition } from "react";
+import { startTransition, useActionState, useEffect, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -43,11 +43,19 @@ export function ItemForm({
     maxLoanDays: number;
   };
 }) {
-  const { state, pending, form } = useFormAction(action, null);
+  const { state, pending, form } = useFormAction(action, null, {
+    // phone photos are often over 5MB — shrink in the browser before sending
+    prepare: async (fd) => {
+      const file = fd.get("image");
+      if (file instanceof File && file.size > 0) fd.set("image", await shrinkImage(file));
+      return fd;
+    },
+  });
   const [kind, setKind] = useState(item?.kind ?? "QUANTITY");
   return (
     <form {...form} className="space-y-3">
       {item && <input type="hidden" name="id" value={item.id} />}
+      {!item && <NewItemImage />}
       <div className="space-y-1">
         <Label htmlFor="name">ชื่อของ</Label>
         <Input id="name" name="name" required defaultValue={item?.name} />
@@ -115,13 +123,85 @@ export function ItemForm({
       {state?.ok && <p className="text-xs text-status-returned">บันทึกแล้ว</p>}
       {!item && (
         <p className="text-xs text-muted-foreground">
-          {kind === "SERIALIZED" ? "เพิ่มรูปและเลขครุภัณฑ์ได้ในหน้าถัดไปหลังกดเพิ่มของ" : "เพิ่มรูปได้ในหน้าถัดไปหลังกดเพิ่มของ"}
+          {kind === "SERIALIZED" ? "เพิ่มเลขครุภัณฑ์ได้ในหน้าถัดไปหลังกดเพิ่มของ" : "แก้ไขข้อมูลและเปลี่ยนรูปได้ภายหลังในหน้าของชิ้นนี้"}
         </p>
       )}
       <Button type="submit" disabled={pending}>
         {pending ? "กำลังบันทึก..." : item ? "บันทึก" : "เพิ่มของ"}
       </Button>
     </form>
+  );
+}
+
+/** Picture picker for the "add item" form (first field), with a preview. */
+function NewItemImage() {
+  const [preview, setPreview] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => () => {
+    if (preview) URL.revokeObjectURL(preview);
+  }, [preview]);
+
+  function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.currentTarget.files?.[0];
+    setError(null);
+    if (!file) return setPreview(null);
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      e.currentTarget.value = "";
+      setPreview(null);
+      return setError("รองรับเฉพาะไฟล์ jpg, png, webp");
+    }
+    setPreview(URL.createObjectURL(file));
+  }
+
+  return (
+    <div className="space-y-1">
+      <span className="text-sm font-medium">รูปภาพ (ไม่บังคับ)</span>
+      <div className="flex items-center gap-3">
+        <label
+          htmlFor="new-item-image"
+          className="grid size-24 shrink-0 cursor-pointer place-items-center overflow-hidden rounded-lg border border-dashed bg-brand-surface text-xs text-muted-foreground hover:border-primary/50"
+        >
+          {preview ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={preview} alt="รูปที่เลือก" className="size-full object-cover" />
+          ) : (
+            "ยังไม่มีรูป"
+          )}
+        </label>
+        <div className="flex flex-col items-start gap-1">
+          <label
+            htmlFor="new-item-image"
+            className="inline-flex h-8 cursor-pointer items-center rounded-lg border border-border bg-background px-3 text-sm font-medium hover:bg-muted"
+          >
+            {preview ? "เปลี่ยนรูป" : "เลือกรูป"}
+          </label>
+          {preview && (
+            <button
+              type="button"
+              className="text-xs text-destructive hover:underline"
+              onClick={() => {
+                const input = document.getElementById("new-item-image") as HTMLInputElement | null;
+                if (input) input.value = "";
+                setPreview(null);
+              }}
+            >
+              เอารูปออก
+            </button>
+          )}
+          <p className="text-xs text-muted-foreground">jpg, png, webp · รูปจากมือถือจะถูกย่อให้อัตโนมัติ</p>
+        </div>
+      </div>
+      <input
+        id="new-item-image"
+        name="image"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        aria-label="รูปภาพ"
+        onChange={onPick}
+        className="sr-only"
+      />
+      {error && <p className="text-xs text-destructive">{error}</p>}
+    </div>
   );
 }
 

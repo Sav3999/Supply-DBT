@@ -223,3 +223,28 @@ describe("image files on disk", () => {
     expect(onDisk(withImage.imagePath)).toBe(false);
   });
 });
+
+describe("create item with a picture", () => {
+  const png = () => new File([new Uint8Array([1])], "a.png", { type: "image/png" });
+
+  test("saves the picture together with the new item", async () => {
+    const staff = await makeUser({ role: "STAFF" });
+    const item = await createItem(asSession(staff), await base(), png());
+    expect(item.imagePath).toMatch(/^[0-9a-f-]{36}\.png$/);
+    expect(existsSync(path.join(UPLOAD_DIR, item.imagePath!))).toBe(true);
+    expect(await audits("ITEM_CREATE")).toBe(1);
+  });
+
+  test("a wrong file type is refused before anything is created", async () => {
+    const staff = await makeUser({ role: "STAFF" });
+    const gif = new File(["x"], "a.gif", { type: "image/gif" });
+    await expect(createItem(asSession(staff), await base(), gif)).rejects.toThrow("รองรับเฉพาะไฟล์ jpg, png, webp");
+    expect(await prisma.item.count()).toBe(0);
+  });
+
+  test("no picture is fine", async () => {
+    const staff = await makeUser({ role: "STAFF" });
+    const item = await createItem(asSession(staff), await base(), null);
+    expect(item.imagePath).toBeNull();
+  });
+});
