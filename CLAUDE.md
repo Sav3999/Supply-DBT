@@ -12,7 +12,7 @@ Thai-language borrow/return web app for the DBT department. Next.js 15 (App Rout
 - Never commit, print, or copy secrets from `.env` (DB password, AUTH_SECRET, LINE token/secret, admin password) — not into git, chat, or notes.
 - Work on `feat/borrow-return`; after each finished change, push it and merge into `main` (push `main` too).
 - Tests: `npm run test:unit`, `npm run test:int` (uses `borrow_test`; DB name must end with `_test`), `npm run test:e2e` — run int and e2e sequentially, never in parallel.
-- Local preview runs from `D:\test1-preview` (a worktree of `main`) on port 3001; after merging into `main`, refresh it with `git -C ../test1-preview reset --hard master`.
+- Local preview runs from `D:\test1-preview` (a worktree of `main`) on port 3001; after merging into `main`, refresh it with `git -C ../test1-preview reset --hard main`.
 
 ## Obsidian work log (always)
 After every piece of work in this project — a fix, a feature, a setup change, a decision, or an answer the user will reuse (e.g. report text) — update the Obsidian vault before ending the turn:
