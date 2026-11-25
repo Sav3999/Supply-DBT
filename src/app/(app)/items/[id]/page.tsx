@@ -1,4 +1,5 @@
 import { parseId } from "@/lib/id";
+import { ItemImage } from "@/components/item-image";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/db";
@@ -19,10 +20,7 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="space-y-4">
-      {item.imagePath ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={`/uploads/${item.imagePath}`} alt={item.name} className="max-h-72 w-full rounded-lg object-cover" />
-      ) : null}
+      {item.imagePath && <ItemImage src={item.imagePath} alt={item.name} className="max-w-md" />}
       <h1 className="text-xl font-semibold">{item.name}</h1>
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <Badge variant="outline">{item.category.name}</Badge>

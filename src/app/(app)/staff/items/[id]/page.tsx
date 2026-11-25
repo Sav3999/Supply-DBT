@@ -1,4 +1,5 @@
 import { parseId } from "@/lib/id";
+import { ItemImage } from "@/components/item-image";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -42,12 +43,7 @@ export default async function StaffItemPage({ params }: { params: Promise<{ id: 
 
       <section className="space-y-3 rounded-lg border p-4">
         <h2 className="font-medium">รูปภาพ</h2>
-        {item.imagePath ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={`/uploads/${item.imagePath}`} alt={item.name} className="max-h-48 rounded-lg border object-contain" />
-        ) : (
-          <div className="grid h-32 w-48 place-items-center rounded-lg border border-dashed bg-brand-surface text-sm text-muted-foreground">ยังไม่มีรูป</div>
-        )}
+        <ItemImage src={item.imagePath} alt={item.name} emptyText="ยังไม่มีรูป" className="max-w-64" />
         <ImageForm action={uploadImageAction} removeAction={removeImageAction} id={item.id} hasImage={Boolean(item.imagePath)} />
         <p className="text-xs text-muted-foreground">รองรับ jpg, png, webp · รูปจากมือถือจะถูกย่อให้อัตโนมัติ</p>
       </section>
