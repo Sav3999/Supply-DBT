@@ -14,8 +14,9 @@ export function BrandLogo({ size = 36, showName = true }: { size?: number; showN
         <Image src="/brand/dbt-logo.jpg" alt="DBT" width={size} height={size} priority />
       </span>
       {showName && (
-        <span className="font-heading text-base leading-none font-bold whitespace-nowrap text-foreground sm:text-lg">
-          ระบบคลังวัสดุ <span className="text-primary">DBT</span>
+        <span className="flex flex-col gap-1 font-heading leading-none whitespace-nowrap">
+          <span className="text-base font-bold text-foreground sm:text-lg">ระบบคลังวัสดุ</span>
+          <span className="text-xs font-semibold text-primary sm:text-sm">แผนกเทคโนโลยีธุรกิจดิจิทัล</span>
         </span>
       )}
     </span>

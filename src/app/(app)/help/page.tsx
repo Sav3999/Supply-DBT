@@ -56,7 +56,7 @@ export default async function HelpPage() {
       <div className="space-y-1">
         <h1 className="text-xl font-semibold">วิธีใช้งาน</h1>
         <p className="text-sm text-muted-foreground">
-          ขั้นตอนการใช้ระบบคลังวัสดุ DBT ทีละขั้น กดชื่อเมนูสีน้ำเงินเพื่อไปยังหน้านั้นได้เลย
+          ขั้นตอนการใช้ระบบคลังวัสดุ ทีละขั้น กดชื่อเมนูสีน้ำเงินเพื่อไปยังหน้านั้นได้เลย
         </p>
       </div>
 
