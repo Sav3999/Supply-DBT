@@ -9,6 +9,11 @@ import { startTransition, useActionState, useEffect, useRef, type FormEvent } fr
  * submit — so a validation error wipes what the user typed. Submitting through
  * onSubmit keeps the input; `resetOnSuccess` clears it only when the action worked
  * (add forms), and `confirm` asks before destructive actions (delete).
+ *
+ * `action` is still passed to the form so a submit before the page has finished
+ * loading (no JS yet) posts to the server action instead of doing a plain GET
+ * that drops the data. Once hydrated, onSubmit's preventDefault makes React skip
+ * its own action handling, so the action runs exactly once.
  */
 export function useFormAction<S>(
   action: (prev: Awaited<S>, fd: FormData) => Promise<S>,
@@ -29,5 +34,5 @@ export function useFormAction<S>(
     startTransition(() => dispatch(fd));
   }
 
-  return { state, pending, form: { ref, onSubmit } };
+  return { state, pending, form: { ref, onSubmit, action: dispatch } };
 }

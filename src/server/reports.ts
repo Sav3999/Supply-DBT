@@ -96,7 +96,8 @@ const CSV_HEADER = ["เลขที่", "ผู้ยืม", "ชั้นป
 
 /** ข้อความอิสระ: กัน formula injection ใน Excel ด้วย ' นำหน้าค่าที่ขึ้นต้นด้วย = + - @ tab CR (แล้วจึง quote ตาม RFC 4180) */
 function csvText(v: string): string {
-  return csvCell(/^[=+\-@\t\r]/.test(v) ? `'${v}` : v);
+  // a lone "-" (empty field placeholder) can't be a formula; prefixing it shows '- in Excel
+  return csvCell(v !== "-" && /^[=+\-@\t\r]/.test(v) ? `'${v}` : v);
 }
 
 function csvCell(v: string): string {

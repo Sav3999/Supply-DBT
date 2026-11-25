@@ -125,23 +125,33 @@ export function ItemForm({
   );
 }
 
-export function ImageForm({ action, id }: { action: Action; id: number }) {
+export function ImageForm({
+  action,
+  removeAction,
+  id,
+  hasImage,
+}: {
+  action: Action;
+  removeAction: Action;
+  id: number;
+  hasImage: boolean;
+}) {
   const [state, formAction, pending] = useActionState(action, null);
+  const remove = useFormAction(removeAction, null, { confirm: "ลบรูปของชิ้นนี้ใช่ไหม?" });
   const [preparing, startPreparing] = useTransition();
   const [localError, setLocalError] = useState<string | null>(null);
+  const inputId = `image-${id}`;
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const file = (form.elements.namedItem("image") as HTMLInputElement | null)?.files?.[0];
+  // upload as soon as a file is picked — no second button to forget
+  function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.currentTarget;
+    const file = input.files?.[0];
     setLocalError(null);
-    if (!file) {
-      setLocalError("กรุณาเลือกไฟล์รูป");
-      return;
-    }
+    if (!file) return;
     startPreparing(async () => {
       // phone photos are often over 5MB — shrink in the browser before sending
       const small = await shrinkImage(file);
+      input.value = "";
       if (small.size > MAX_IMAGE_BYTES) {
         setLocalError("ไฟล์ใหญ่เกิน 5MB และย่อขนาดอัตโนมัติไม่ได้ ลองใช้รูป jpg หรือ png");
         return;
@@ -151,21 +161,44 @@ export function ImageForm({ action, id }: { action: Action; id: number }) {
       fd.set("image", small);
       // after an await the outer transition context is gone, so dispatch in a fresh one
       startTransition(() => formAction(fd));
-      form.reset();
     });
   }
 
   const busy = pending || preparing;
   return (
-    <form onSubmit={onSubmit} className="space-y-2">
-      <Input name="image" type="file" accept="image/jpeg,image/png,image/webp" required aria-label="รูปภาพ" />
+    <div className="space-y-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          id={inputId}
+          name="image"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          aria-label="รูปภาพ"
+          onChange={onPick}
+          disabled={busy}
+          className="sr-only"
+        />
+        <label
+          htmlFor={inputId}
+          aria-disabled={busy}
+          className="inline-flex h-8 cursor-pointer items-center rounded-lg border border-border bg-background px-3 text-sm font-medium hover:bg-muted aria-disabled:pointer-events-none aria-disabled:opacity-50"
+        >
+          {busy ? "กำลังอัปโหลด..." : hasImage ? "เปลี่ยนรูป" : "เลือกรูป"}
+        </label>
+        {hasImage && (
+          <form {...remove.form}>
+            <input type="hidden" name="id" value={id} />
+            <Button type="submit" size="sm" variant="ghost" disabled={busy || remove.pending} className="text-destructive hover:text-destructive">
+              ลบรูป
+            </Button>
+          </form>
+        )}
+      </div>
       {localError && <p className="text-xs text-destructive">{localError}</p>}
       <Err state={state} />
-      {state?.ok && !busy && <p className="text-xs text-muted-foreground">อัปโหลดรูปแล้ว</p>}
-      <Button type="submit" size="sm" variant="outline" disabled={busy}>
-        {busy ? "กำลังอัปโหลด..." : "อัปโหลดรูป"}
-      </Button>
-    </form>
+      <Err state={remove.state} />
+      {state?.ok && !busy && hasImage && <p className="text-xs text-status-returned">อัปโหลดรูปแล้ว</p>}
+    </div>
   );
 }
 

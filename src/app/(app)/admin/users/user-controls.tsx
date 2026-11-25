@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { ROLE_LABEL } from "@/lib/labels";
+import { useFormAction } from "@/lib/use-form-action";
 import type { ActionState } from "./actions";
 
 type Action = (prev: ActionState, fd: FormData) => Promise<ActionState>;
@@ -12,15 +13,17 @@ export function ActionButton({
   userId,
   label,
   variant = "default",
+  confirmText,
 }: {
   action: Action;
   userId: number;
   label: string;
   variant?: "default" | "outline" | "destructive";
+  confirmText?: string;
 }) {
-  const [state, formAction, pending] = useActionState(action, null);
+  const { state, pending, form } = useFormAction(action, null, { confirm: confirmText });
   return (
-    <form action={formAction} className="inline-flex flex-col gap-1">
+    <form {...form} className="inline-flex flex-col gap-1">
       <input type="hidden" name="userId" value={userId} />
       <Button type="submit" size="sm" variant={variant} disabled={pending}>
         {label}

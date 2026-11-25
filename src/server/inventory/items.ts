@@ -5,7 +5,7 @@ import { AppError } from "@/lib/result";
 import { logAudit } from "@/server/audit";
 import { assertRole, type SessionUser } from "@/server/auth/session";
 import { outstandingQuantity } from "@/server/loans/availability";
-import { saveUpload } from "./upload";
+import { removeUpload, saveUpload } from "./upload";
 
 const THAI_DIGITS = "๐๑๒๓๔๕๖๗๘๙";
 
@@ -137,11 +137,36 @@ export async function setItemImage(actor: SessionUser, itemId: number, file: Fil
   assertRole(actor, "STAFF");
   if (!(await prisma.item.findUnique({ where: { id: itemId } }))) throw new AppError("ไม่พบของ");
   const imagePath = await saveUpload(file);
-  return prisma.$transaction(async (tx) => {
-    const item = await tx.item.update({ where: { id: itemId }, data: { imagePath } });
-    await logAudit(tx, { actorId: actor.id, action: "ITEM_UPDATE", entity: "Item", entityId: itemId, data: { imagePath } });
-    return item;
+  let old: string | null = null;
+  let item: Item;
+  try {
+    item = await prisma.$transaction(async (tx) => {
+      const before = await tx.item.findUnique({ where: { id: itemId }, select: { imagePath: true } });
+      if (!before) throw new AppError("ไม่พบของ");
+      old = before.imagePath;
+      const updated = await tx.item.update({ where: { id: itemId }, data: { imagePath } });
+      await logAudit(tx, { actorId: actor.id, action: "ITEM_UPDATE", entity: "Item", entityId: itemId, data: { imagePath } });
+      return updated;
+    });
+  } catch (e) {
+    await removeUpload(imagePath); // the new file is not referenced by anything
+    throw e;
+  }
+  await removeUpload(old);
+  return item;
+}
+
+/** Take the picture off an item (and delete the file). */
+export async function clearItemImage(actor: SessionUser, itemId: number): Promise<void> {
+  assertRole(actor, "STAFF");
+  const old = await prisma.$transaction(async (tx) => {
+    const before = await tx.item.findUnique({ where: { id: itemId }, select: { imagePath: true } });
+    if (!before) throw new AppError("ไม่พบของ");
+    await tx.item.update({ where: { id: itemId }, data: { imagePath: null } });
+    await logAudit(tx, { actorId: actor.id, action: "ITEM_IMAGE_REMOVE", entity: "Item", entityId: itemId, data: { imagePath: before.imagePath } });
+    return before.imagePath;
   });
+  await removeUpload(old);
 }
 
 export async function setItemActive(actor: SessionUser, itemId: number, active: boolean): Promise<Item> {
@@ -160,7 +185,7 @@ export async function setItemActive(actor: SessionUser, itemId: number, active: 
  */
 export async function deleteItem(actor: SessionUser, itemId: number): Promise<void> {
   assertRole(actor, "STAFF");
-  await prisma.$transaction(async (tx) => {
+  const imagePath = await prisma.$transaction(async (tx) => {
     await tx.$queryRaw`SELECT id FROM "Item" WHERE id = ${itemId} FOR UPDATE`;
     const item = await tx.item.findUnique({ where: { id: itemId } });
     if (!item) throw new AppError("ไม่พบของ");
@@ -170,7 +195,9 @@ export async function deleteItem(actor: SessionUser, itemId: number): Promise<vo
     await tx.asset.deleteMany({ where: { itemId } });
     await tx.item.delete({ where: { id: itemId } });
     await logAudit(tx, { actorId: actor.id, action: "ITEM_DELETE", entity: "Item", entityId: itemId, data: { name: item.name } });
+    return item.imagePath;
   });
+  await removeUpload(imagePath);
 }
 
 /** What blocks deleting an item: how many loans used it, and which asset ids were ever lent. */

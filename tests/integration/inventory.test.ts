@@ -1,16 +1,19 @@
-import { mkdtempSync } from "node:fs";
+import { existsSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, test } from "vitest";
 import { prisma } from "@/lib/db";
 import { parseDateOnly as d } from "@/lib/dates";
 import { createCategory, deleteCategory, renameCategory } from "@/server/inventory/categories";
-import { createItem, deleteItem, getItem, listItems, setItemActive, setItemImage, updateItem } from "@/server/inventory/items";
+import { clearItemImage, createItem, deleteItem, getItem, listItems, setItemActive, setItemImage, updateItem } from "@/server/inventory/items";
 import { addAsset, deleteAsset, setAssetStatus } from "@/server/inventory/assets";
 import { outstandingQuantity } from "@/server/loans/availability";
 import { asSession, makeItem, makeLoan, makeUser, resetDb } from "./helpers";
 
 beforeEach(resetDb);
+
+const UPLOAD_DIR = mkdtempSync(path.join(tmpdir(), "inv-img-"));
+process.env.UPLOAD_DIR = UPLOAD_DIR;
 
 const audits = (action: string) => prisma.auditLog.count({ where: { action } });
 
@@ -173,7 +176,6 @@ describe("delete", () => {
 
 describe("image", () => {
   test("setItemImage stores filename and rejects bad type", async () => {
-    process.env.UPLOAD_DIR = mkdtempSync(path.join(tmpdir(), "inv-img-"));
     const staff = await makeUser({ role: "STAFF" });
     const item = await makeItem({ kind: "QUANTITY", totalQuantity: 1 });
     await expect(
@@ -185,5 +187,39 @@ describe("image", () => {
       new File([new Uint8Array([1])], "a.png", { type: "image/png" }),
     );
     expect(updated.imagePath).toMatch(/^[0-9a-f-]{36}\.png$/);
+  });
+});
+
+describe("image files on disk", () => {
+  // getEnv() caches UPLOAD_DIR, so every test in this file shares one folder (set at the top)
+  const png = () => new File([new Uint8Array([1])], "a.png", { type: "image/png" });
+  const onDisk = (name: string | null) => name !== null && existsSync(path.join(UPLOAD_DIR, name));
+
+  test("replacing a picture removes the old file", async () => {
+    const staff = await makeUser({ role: "STAFF" });
+    const item = await makeItem({ kind: "QUANTITY", totalQuantity: 1 });
+    const first = await setItemImage(asSession(staff), item.id, png());
+    const second = await setItemImage(asSession(staff), item.id, png());
+    expect(onDisk(first.imagePath)).toBe(false);
+    expect(onDisk(second.imagePath)).toBe(true);
+  });
+
+  test("clearItemImage removes the picture and the file, with audit", async () => {
+    const staff = await makeUser({ role: "STAFF" });
+    const item = await makeItem({ kind: "QUANTITY", totalQuantity: 1 });
+    const withImage = await setItemImage(asSession(staff), item.id, png());
+    await clearItemImage(asSession(staff), item.id);
+    expect((await prisma.item.findUniqueOrThrow({ where: { id: item.id } })).imagePath).toBeNull();
+    expect(onDisk(withImage.imagePath)).toBe(false);
+    expect(await audits("ITEM_IMAGE_REMOVE")).toBe(1);
+  });
+
+  test("deleting an item removes its picture file", async () => {
+    const staff = await makeUser({ role: "STAFF" });
+    const item = await makeItem({ kind: "QUANTITY", totalQuantity: 1 });
+    const withImage = await setItemImage(asSession(staff), item.id, png());
+    expect(onDisk(withImage.imagePath)).toBe(true);
+    await deleteItem(asSession(staff), item.id);
+    expect(onDisk(withImage.imagePath)).toBe(false);
   });
 });

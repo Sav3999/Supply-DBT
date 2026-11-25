@@ -12,6 +12,7 @@ import {
   assetStatusAction,
   deleteAssetAction,
   deleteItemAction,
+  removeImageAction,
   setActiveAction,
   updateItemAction,
   uploadImageAction,
@@ -43,12 +44,12 @@ export default async function StaffItemPage({ params }: { params: Promise<{ id: 
         <h2 className="font-medium">รูปภาพ</h2>
         {item.imagePath ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={`/uploads/${item.imagePath}`} alt={item.name} className="max-h-48 rounded-lg" />
+          <img src={`/uploads/${item.imagePath}`} alt={item.name} className="max-h-48 rounded-lg border object-contain" />
         ) : (
-          <p className="text-sm text-muted-foreground">ยังไม่มีรูป</p>
+          <div className="grid h-32 w-48 place-items-center rounded-lg border border-dashed bg-brand-surface text-sm text-muted-foreground">ยังไม่มีรูป</div>
         )}
-        <ImageForm action={uploadImageAction} id={item.id} />
-        <p className="text-xs text-muted-foreground">รองรับ jpg, png, webp ไม่เกิน 5MB</p>
+        <ImageForm action={uploadImageAction} removeAction={removeImageAction} id={item.id} hasImage={Boolean(item.imagePath)} />
+        <p className="text-xs text-muted-foreground">รองรับ jpg, png, webp · รูปจากมือถือจะถูกย่อให้อัตโนมัติ</p>
       </section>
 
       <section className="space-y-3 rounded-lg border p-4">
