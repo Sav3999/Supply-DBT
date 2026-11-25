@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { signOut } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { navFor } from "@/components/nav";
+import { MainNav } from "@/components/main-nav";
 import { getCurrentUser } from "@/server/auth/session";
 import { NotificationBell } from "@/components/notification-bell";
 import { BrandLogo } from "@/components/brand-logo";
@@ -43,17 +44,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               </form>
             </div>
           </div>
-          <nav className="flex gap-1 overflow-x-auto pb-1">
-            {items.map((i) => (
-              <Link
-                key={i.href}
-                href={i.href}
-                className="rounded-md px-3 py-1.5 text-sm whitespace-nowrap hover:bg-muted"
-              >
-                {i.label}
-              </Link>
-            ))}
-          </nav>
+          <MainNav items={items} />
         </div>
       </header>
       <main className="mx-auto max-w-5xl p-4">
